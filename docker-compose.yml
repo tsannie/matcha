@@ -1,0 +1,56 @@
+services:
+  # --- PostgreSQL Database ---
+  db:
+    image: postgres:15
+    container_name: matcha_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+
+  # --- Backend (Node/Express) ---
+  server:
+    build: ./server
+    container_name: matcha_server
+    restart: always
+    ports:
+      - '5000:5000'
+    volumes:
+      - ./server:/usr/src/app
+      # Anonymous volume to isolate container node_modules from host
+      - /usr/src/app/node_modules
+    depends_on:
+      - db
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db
+      - DB_NAME=${DB_NAME}
+      - PORT=5000
+      - JWT_SECRET=${JWT_SECRET}
+
+  # --- Frontend (React/Vite) ---
+  client:
+    build: ./client
+    container_name: matcha_client
+    restart: always
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./client:/app
+      # Anonymous volume to isolate container node_modules from host
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+  # --- Database GUI ---
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - '8080:8080'
