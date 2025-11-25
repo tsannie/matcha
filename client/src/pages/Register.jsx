@@ -1,17 +1,16 @@
-// src/pages/Register.jsx
 import { useState } from 'react';
-import api from '../api/axios';
+import { Link, useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
-import { useNavigate, Link } from 'react-router-dom';
+import api from '../api/axios';
 
 const Register = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
     firstname: '',
     lastname: '',
+    username: '',
+    email: '',
     password: '',
     confirmPassword: '',
   });
@@ -23,36 +22,33 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic frontend validation
     if (formData.password !== formData.confirmPassword) {
       return toast.error('Passwords do not match');
     }
 
     try {
-      // Send data to backend (excluding confirmPassword)
       const { confirmPassword, ...dataToSend } = formData;
 
       await api.post('/auth/register', dataToSend);
 
       toast.success('Account created! Please check your email.');
-      navigate('/login'); // Redirect to login page
+      navigate('/login'); // Redirection vers le login
     } catch (error) {
-      // Handle backend errors
       if (error.response && error.response.data.error) {
         toast.error(error.response.data.error);
       } else {
         toast.error('An unexpected error occurred.');
+        console.error(error);
       }
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Create Account</h2>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-xl">
+        <h2 className="mb-6 text-2xl font-bold text-center text-gray-800">Create Account</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Grid for Firstname / Lastname */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">First Name</label>
@@ -60,7 +56,7 @@ const Register = () => {
                 type="text"
                 name="firstname"
                 required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 onChange={handleChange}
               />
             </div>
@@ -70,7 +66,7 @@ const Register = () => {
                 type="text"
                 name="lastname"
                 required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 onChange={handleChange}
               />
             </div>
@@ -82,7 +78,7 @@ const Register = () => {
               type="text"
               name="username"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               onChange={handleChange}
             />
           </div>
@@ -93,7 +89,7 @@ const Register = () => {
               type="email"
               name="email"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               onChange={handleChange}
             />
           </div>
@@ -104,9 +100,10 @@ const Register = () => {
               type="password"
               name="password"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               onChange={handleChange}
             />
+            <p className="mt-1 text-xs text-gray-500">Min 8 chars, 1 Uppercase, 1 Lowercase, 1 Number, 1 Symbol.</p>
           </div>
 
           <div>
@@ -115,20 +112,20 @@ const Register = () => {
               type="password"
               name="confirmPassword"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               onChange={handleChange}
             />
           </div>
 
           <button
             type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="w-full py-2 font-semibold text-white transition bg-indigo-600 rounded-md hover:bg-indigo-700"
           >
             Sign Up
           </button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-gray-600">
+        <p className="mt-4 text-sm text-center text-gray-600">
           Already have an account?{' '}
           <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
             Log in
