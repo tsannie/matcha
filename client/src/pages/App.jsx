@@ -11,7 +11,7 @@ const Login = () => (
 
 function App() {
   return (
-    <>
+    <div className="w-screen h-screen">
       <Toaster position="top-right" reverseOrder={false} />
 
       <Routes>
@@ -20,7 +20,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
       </Routes>
-    </>
+    </div>
   );
 }
 
