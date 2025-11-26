@@ -1,13 +1,29 @@
 import { Routes, Route, Navigate } from 'react-router';
 import { Toaster } from 'react-hot-toast';
 import Register from './Register';
+import Login from './Login';
+import Home from './Home';
+import VerifyEmail from './VerifyEmail';
 
-// Placeholder pour Login (on le fera juste après)
-const Login = () => (
-  <div className="flex items-center justify-center h-screen bg-gray-100">
-    <h1 className="text-3xl font-bold text-blue-600">Login Page Coming Soon</h1>
-  </div>
-);
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
+
+const PublicRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+
+  if (token) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
 
 function App() {
   return (
@@ -15,10 +31,45 @@ function App() {
       <Toaster position="top-right" reverseOrder={false} />
 
       <Routes>
-        <Route path="/" element={<Navigate to="/register" replace />} />
+        {/* Protected Dashboard */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
+        {/* Public Routes (Login/Register) */}
+        <Route
+          path="/register"
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/verify-email"
+          element={
+            <PublicRoute>
+              <VerifyEmail />
+            </PublicRoute>
+          }
+        />
+
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   );

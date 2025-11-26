@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db.js'; // Import our clean DB connection
 import { validateRegistration } from '../utils/validation.js';
+import { sendVerificationEmail } from '../utils/emailService.js';
 
 export const register = async (req, res) => {
   const { email, username, password, firstname, lastname } = req.body;
@@ -27,8 +28,10 @@ export const register = async (req, res) => {
       [email, username, firstname, lastname, hashedPassword, verifyToken]
     );
 
+    await sendVerificationEmail(email, verifyToken);
+
     res.status(201).json({
-      message: 'User created successfully. Please verify your email.',
+      message: 'User created successfully. Please check your email to verify your account.',
       user: newUser.rows[0],
     });
   } catch (err) {
@@ -57,6 +60,27 @@ export const login = async (req, res) => {
     const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     res.json({ token, user: { id: user.id, username: user.username } });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export const verifyEmail = async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) return res.status(400).json({ error: 'Token is missing' });
+
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE token = $1', [token]);
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired token.' });
+    }
+
+    await pool.query('UPDATE users SET verified = true, token = NULL WHERE id = $1', [result.rows[0].id]);
+
+    res.status(200).json({ message: 'Account verified successfully! You can now log in.' });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: 'Server error' });

@@ -33,6 +33,12 @@ services:
       - DB_NAME=${DB_NAME}
       - PORT=5000
       - JWT_SECRET=${JWT_SECRET}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_SECURE=${EMAIL_SECURE}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - CLIENT_URL=${CLIENT_URL}
 
   # --- Frontend (React/Vite) ---
   client:
