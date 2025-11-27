@@ -26,8 +26,10 @@ const createTables = async () => {
       firstname VARCHAR(50) NOT NULL,
       lastname VARCHAR(50) NOT NULL,
       password VARCHAR(255) NOT NULL,
-      is_verified BOOLEAN DEFAULT FALSE,
+      verified BOOLEAN DEFAULT FALSE,
       token VARCHAR(255),
+      reset_token VARCHAR(255),
+      reset_token_expires TIMESTAMP,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
   `;

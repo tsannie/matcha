@@ -4,6 +4,8 @@ import Register from './Register';
 import Login from './Login';
 import Home from './Home';
 import VerifyEmail from './VerifyEmail';
+import ForgotPassword from './ForgotPassword';
+import ResetPassword from './ResetPassword';
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
@@ -65,6 +67,24 @@ function App() {
           element={
             <PublicRoute>
               <VerifyEmail />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicRoute>
+              <ForgotPassword />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/reset-password"
+          element={
+            <PublicRoute>
+              <ResetPassword />
             </PublicRoute>
           }
         />

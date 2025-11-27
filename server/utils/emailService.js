@@ -40,3 +40,27 @@ export const sendVerificationEmail = async (email, token) => {
     throw new Error('Email sending failed'); // Let the controller handle the error
   }
 };
+
+export const sendResetPasswordEmail = async (email, token) => {
+  const url = `${process.env.CLIENT_URL}/reset-password?token=${token}`;
+
+  const mailOptions = {
+    from: '"Matcha Team" <no-reply@matcha.com>',
+    to: email,
+    subject: 'Reset your Password',
+    html: `
+      <h1>Password Reset Request</h1>
+      <p>You requested to reset your password. Click the link below to set a new one:</p>
+      <a href="${url}">Reset Password</a>
+      <p>This link will expire in 1 hour.</p>
+      <p>If you did not request this, please ignore this email.</p>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Password reset email sent to ${email}`);
+  } catch (error) {
+    console.error('Error sending reset email:', error);
+  }
+};

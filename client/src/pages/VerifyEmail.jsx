@@ -1,14 +1,18 @@
-import { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router'; // Check if using 'react-router-dom'
+import { useEffect, useState, useRef } from 'react'; // 1. Import useRef
+import { useSearchParams, useNavigate } from 'react-router';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [status, setStatus] = useState('verifying'); // 'verifying', 'success', 'error'
+  const [status, setStatus] = useState('verifying');
+  // strict mode double call
+  const effectRan = useRef(false);
 
   useEffect(() => {
+    if (effectRan.current === true) return;
+
     const verifyAccount = async () => {
       const token = searchParams.get('token');
 
@@ -20,14 +24,13 @@ const VerifyEmail = () => {
 
       try {
         await api.post('/auth/verify-email', { token });
-
         setStatus('success');
         toast.success('Account verified! Redirecting to login...');
-
         setTimeout(() => {
           navigate('/login');
         }, 3000);
       } catch (error) {
+        // En prod, ça n'arrivera pas, mais en dev, ça évite le flash rouge
         console.error(error);
         setStatus('error');
         const msg = error.response?.data?.error || 'Verification failed.';
@@ -35,9 +38,12 @@ const VerifyEmail = () => {
       }
     };
 
-    // Run verification on mount
     verifyAccount();
-  }, [searchParams, navigate]);
+
+    return () => {
+      effectRan.current = true;
+    };
+  }, []);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-bg p-4">

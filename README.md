@@ -9,3 +9,9 @@ EMAIL_SECURE=false
 EMAIL_USER=REDACTED_SMTP_USER
 EMAIL_PASS=REDACTED_SMTP_PASSWORD
 CLIENT_URL=http://localhost:5173
+
+2#cS`xm00rxC
+
+# To reset the database, run the following command:
+
+docker run --rm -v "$PWD":/app -w /app alpine rm -rf data

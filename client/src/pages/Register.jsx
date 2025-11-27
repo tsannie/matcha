@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router'; // Check import based on your version
+import { Link, useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
 import FormInput from '../components/FormInput';
+import PasswordStrength from '../components/PasswordStrength'; // Import the new component
 
 const Register = () => {
   const navigate = useNavigate();
@@ -29,17 +30,10 @@ const Register = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const getPasswordCriteria = (password) => [
-    { label: '8 Characters', valid: password.length >= 8 },
-    { label: '1 Uppercase letter', valid: /(?=.*[A-Z])/.test(password) },
-    { label: '1 Lowercase letter', valid: /(?=.*[a-z])/.test(password) },
-    { label: '1 Number', valid: /(?=.*\d)/.test(password) },
-    { label: '1 Special character', valid: /(?=.*[\W_])/.test(password) },
-  ];
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Ideally, extract this regex to a shared utility file too
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (!passwordRegex.test(formData.password)) {
       return toast.error('Password does not meet requirements.');
@@ -69,21 +63,7 @@ const Register = () => {
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-5">
           {fieldsConfig.map((field) => (
             <FormInput key={field.name} {...field} onChange={handleChange}>
-              {field.name === 'password' && (
-                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-1">
-                  {getPasswordCriteria(formData.password).map((criteria, index) => (
-                    <div
-                      key={index}
-                      className={`text-xs flex items-center gap-1 transition-colors duration-200 ${
-                        criteria.valid ? 'text-green-600' : 'text-red-600'
-                      }`}
-                    >
-                      <span>{criteria.valid ? '✓' : '✕'}</span>
-                      {criteria.label}
-                    </div>
-                  ))}
-                </div>
-              )}
+              {field.name === 'password' && <PasswordStrength password={formData.password} />}
             </FormInput>
           ))}
 

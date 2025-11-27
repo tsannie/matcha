@@ -1,8 +1,10 @@
-import bcrypt from 'bcrypt';
+import pool from '../config/db.js';
+import { hashPassword, validateRegistration, validateResetPassword } from '../utils/validation.js';
+import { sendResetPasswordEmail, sendVerificationEmail } from '../utils/emailService.js';
+
 import jwt from 'jsonwebtoken';
-import pool from '../config/db.js'; // Import our clean DB connection
-import { validateRegistration } from '../utils/validation.js';
-import { sendVerificationEmail } from '../utils/emailService.js';
+import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 
 export const register = async (req, res) => {
   const { email, username, password, firstname, lastname } = req.body;
@@ -17,10 +19,9 @@ export const register = async (req, res) => {
       return res.status(409).json({ error: 'Email or Username already exists.' });
     }
 
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const hashedPassword = await hashPassword(password);
 
-    const verifyToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    const verifyToken = crypto.randomBytes(32).toString('hex');
 
     const newUser = await pool.query(
       `INSERT INTO users (email, username, firstname, lastname, password, token)
@@ -81,6 +82,69 @@ export const verifyEmail = async (req, res) => {
     await pool.query('UPDATE users SET verified = true, token = NULL WHERE id = $1', [result.rows[0].id]);
 
     res.status(200).json({ message: 'Account verified successfully! You can now log in.' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const userCheck = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    if (userCheck.rows.length === 0) {
+      return res.status(200).json({ message: 'If an account exists with this email, a reset link has been sent.' });
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
+
+    await pool.query('UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE email = $3', [
+      token,
+      expires,
+      email,
+    ]);
+
+    await sendResetPasswordEmail(email, token);
+
+    res.status(200).json({ message: 'If an account exists with this email, a reset link has been sent.' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  const error = validateResetPassword(newPassword);
+  if (error) return res.status(400).json({ error });
+
+  try {
+    const userCheck = await pool.query('SELECT * FROM users WHERE reset_token = $1', [token]);
+
+    if (userCheck.rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired token.' });
+    }
+
+    const user = userCheck.rows[0];
+    const now = new Date();
+
+    if (parseInt(user.reset_token_expires) < now) {
+      return res.status(400).json({ error: 'Token has expired. Please request a new one.' });
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+
+    await pool.query('UPDATE users SET password = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2', [
+      hashedPassword,
+      user.id,
+    ]);
+
+    res
+      .status(200)
+      .json({ message: 'Password has been reset successfully. You can now log in with your new password.' });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: 'Server error' });
