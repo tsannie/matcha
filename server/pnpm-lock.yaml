@@ -35,6 +35,9 @@ importers:
       socket.io:
         specifier: ^4.8.1
         version: 4.8.1
+      zxcvbn:
+        specifier: ^4.4.2
+        version: 4.4.2
 
 packages:
 
@@ -597,6 +600,9 @@ packages:
   xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
     engines: {node: '>=0.4'}
+
+  zxcvbn@4.4.2:
+    resolution: {integrity: sha512-Bq0B+ixT/DMyG8kgX2xWcI5jUvCwqrMxSFam7m0lAf78nf04hv6lNCsyLYdyYTrCVMqNDY/206K7eExYCeSyUQ==}
 
 snapshots:
 
@@ -1192,3 +1198,5 @@ snapshots:
   ws@8.17.1: {}
 
   xtend@4.0.2: {}
+
+  zxcvbn@4.4.2: {}

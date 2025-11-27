@@ -11,6 +11,7 @@ EMAIL_PASS=REDACTED_SMTP_PASSWORD
 CLIENT_URL=http://localhost:5173
 
 2#cS`xm00rxC
+P@$$w0rd123?
 
 # To reset the database, run the following command:
 

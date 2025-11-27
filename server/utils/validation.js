@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import zxcvbn from 'zxcvbn';
 
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -10,11 +11,17 @@ const validateEmail = (email) => {
   return null;
 };
 
-const validatePasswordComplexity = (password) => {
+export const validatePasswordComplexity = (password) => {
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-
   if (!passwordRegex.test(password)) {
     return 'Password must be at least 8 characters long, contain one uppercase, one lowercase, one number and one special character.';
+  }
+
+  const evaluation = zxcvbn(password);
+
+  if (evaluation.score < 3) {
+    const feedback = evaluation.feedback.warning || 'Password is too common or easy to guess.';
+    return `Weak password: ${feedback}`;
   }
 
   return null;
