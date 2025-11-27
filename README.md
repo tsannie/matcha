@@ -16,3 +16,5 @@ P@$$w0rd123?
 # To reset the database, run the following command:
 
 docker run --rm -v "$PWD":/app -w /app alpine rm -rf data
+
+https://www.drawdb.app/editor?shareId=20ccfdcee9dffba1be9b435bf890e74b
