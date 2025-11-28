@@ -13,6 +13,15 @@ const getTagsFromUserId = async (userId) => {
   return tagsResult.rows.map((row) => row.name);
 };
 
+const getImagesFromUserId = async (userId) => {
+  const imagesResult = await pool.query(
+    'SELECT id, file_path, is_profile_picture FROM user_images WHERE user_id = $1 ORDER BY uploaded_at ASC',
+    [userId]
+  );
+
+  return imagesResult.rows;
+};
+
 export const getProfile = async (req, res) => {
   const userId = req.user.id;
 
@@ -27,6 +36,7 @@ export const getProfile = async (req, res) => {
     const userProfile = {
       ...userResult.rows[0],
       tags: await getTagsFromUserId(userId),
+      images: await getImagesFromUserId(userId),
     };
 
     res.json(userProfile);

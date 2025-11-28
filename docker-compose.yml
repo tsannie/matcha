@@ -27,8 +27,8 @@ services:
       - '5000:5000'
     volumes:
       - ./server:/usr/src/app
-      # Anonymous volume to isolate container node_modules from host
       - /usr/src/app/node_modules
+      - ./server/uploads:/usr/src/app/uploads
     depends_on:
       db:
         condition: service_healthy

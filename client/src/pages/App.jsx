@@ -6,6 +6,7 @@ import Home from './Home';
 import VerifyEmail from './VerifyEmail';
 import ForgotPassword from './ForgotPassword';
 import ResetPassword from './ResetPassword';
+import CompleteProfile from './CompleteProfile';
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
@@ -86,6 +87,15 @@ function App() {
             <PublicRoute>
               <ResetPassword />
             </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/complete-profile"
+          element={
+            <ProtectedRoute>
+              <CompleteProfile />
+            </ProtectedRoute>
           }
         />
 
