@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
+import Card from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -23,37 +26,24 @@ const ForgotPassword = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-bg p-4">
-      <div className="w-full max-w-md p-8 bg-white shadow-xl rounded-xl border border-primary3/30">
+      <Card className="w-full max-w-md">
         <h2 className="mb-4 text-3xl font-bold text-center text-primary1">Reset Password</h2>
         <p className="mb-8 text-center text-gray-500 text-sm">
           Enter your email address and we'll send you a link to reset your password.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-primary2 mb-1">
-              Email Address
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-primary3 rounded-md focus:outline-none focus:ring-2 focus:ring-primary1 focus:border-transparent transition-all duration-200 bg-white"
-              placeholder="you@example.com"
-            />
-          </div>
+          <Input
+            label="Email Address"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            name="email"
+          />
 
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-3 text-white font-semibold rounded-lg bg-primary1 hover:bg-hover transform transition-all duration-200 shadow-md ${
-              loading ? 'opacity-70 cursor-not-allowed' : ''
-            }`}
-          >
+          <Button type="submit" loading={loading} className="w-full">
             {loading ? 'Sending...' : 'Send Reset Link'}
-          </button>
+          </Button>
         </form>
 
         <div className="mt-6 text-center">
@@ -61,7 +51,7 @@ const ForgotPassword = () => {
             ← Back to Login
           </Link>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

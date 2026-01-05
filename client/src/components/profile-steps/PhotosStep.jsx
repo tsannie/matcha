@@ -1,3 +1,8 @@
+import React from 'react';
+import Button from '../ui/Button';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const PhotosStep = ({ images, onUpload, onDelete, onSetProfile }) => {
   return (
     <div className="space-y-6 animate-fade-in">
@@ -10,41 +15,55 @@ const PhotosStep = ({ images, onUpload, onDelete, onSetProfile }) => {
         {images.map((img) => (
           <div
             key={img.id}
-            className={`relative group aspect-square rounded-lg overflow-hidden border-2 ${
-              img.is_profile_picture ? 'border-primary1' : 'border-transparent'
-            }`}
+            className={`
+              relative group aspect-square rounded-xl overflow-hidden border-2 transition-all
+              ${img.is_profile_picture ? 'border-primary1 shadow-md' : 'border-transparent bg-gray-100'}
+            `}
           >
-            <img src={`http://localhost:5000${img.file_path}`} alt="User" className="w-full h-full object-cover" />
+            <img src={`${API_URL}${img.file_path}`} alt="User content" className="w-full h-full object-cover" />
 
             {img.is_profile_picture && (
-              <div className="absolute top-2 left-2 bg-primary1 text-white text-[10px] px-2 py-0.5 rounded shadow">
-                Main
+              <div className="absolute top-2 left-2 bg-primary1 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm z-10">
+                MAIN
               </div>
             )}
 
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+            {/* Overlay Actions */}
+            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3 p-4">
               {!img.is_profile_picture && (
-                <button
+                <Button
                   onClick={() => onSetProfile(img.id)}
-                  className="text-xs bg-white text-gray-800 px-3 py-1 rounded hover:bg-primary1 hover:text-white transition"
+                  secondary={true}
+                  className="px-3 py-1 text-xs w-full bg-white text-gray-900 hover:bg-gray-100 border-none"
                 >
                   Make Profile
-                </button>
+                </Button>
               )}
-              <button
+
+              <Button
                 onClick={() => onDelete(img.id)}
-                className="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                className="px-3 py-1 text-xs w-full bg-red-500 hover:bg-red-600 text-white border-none"
               >
                 Delete
-              </button>
+              </Button>
             </div>
           </div>
         ))}
 
         {images.length < 5 && (
-          <label className="border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary1 hover:bg-primary1/5 transition aspect-square">
-            <span className="text-3xl text-gray-400">+</span>
-            <span className="text-sm text-gray-500 mt-2">Upload</span>
+          <label className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-primary1 hover:bg-primary1/5 transition-colors aspect-square group">
+            <div className="p-4 bg-gray-100 rounded-full mb-2 group-hover:bg-white group-hover:scale-110 transition-transform">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 text-gray-400 group-hover:text-primary1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </div>
+            <span className="text-sm font-medium text-gray-500 group-hover:text-primary1">Add Photo</span>
             <input type="file" className="hidden" accept="image/*" onChange={onUpload} />
           </label>
         )}

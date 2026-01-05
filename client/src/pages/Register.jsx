@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
-import FormInput from '../components/FormInput';
-import PasswordStrength from '../components/PasswordStrength'; // Import the new component
+import Card from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
+import PasswordStrength from '../components/PasswordStrength';
 
 const Register = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     firstname: '',
@@ -17,15 +20,6 @@ const Register = () => {
     confirmPassword: '',
   });
 
-  const fieldsConfig = [
-    { name: 'firstname', label: 'First Name', colSpan: 'col-span-1' },
-    { name: 'lastname', label: 'Last Name', colSpan: 'col-span-1' },
-    { name: 'username', label: 'Username' },
-    { name: 'email', label: 'Email', type: 'email' },
-    { name: 'password', label: 'Password', type: 'password' },
-    { name: 'confirmPassword', label: 'Confirm Password', type: 'password' },
-  ];
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -33,7 +27,6 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Ideally, extract this regex to a shared utility file too
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (!passwordRegex.test(formData.password)) {
       return toast.error('Password does not meet requirements.');
@@ -42,6 +35,8 @@ const Register = () => {
     if (formData.password !== formData.confirmPassword) {
       return toast.error('Passwords do not match');
     }
+
+    setLoading(true);
 
     try {
       const { confirmPassword, ...dataToSend } = formData;
@@ -52,28 +47,54 @@ const Register = () => {
       const errorMessage = error.response?.data?.error || 'An unexpected error occurred.';
       toast.error(errorMessage);
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-bg p-4">
-      <div className="w-full max-w-md p-8 bg-white shadow-xl rounded-xl border border-primary3/30">
+      <Card className="w-full max-w-md">
         <h2 className="mb-8 text-3xl font-bold text-center text-primary1">Create Account</h2>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-5">
-          {fieldsConfig.map((field) => (
-            <FormInput key={field.name} {...field} onChange={handleChange}>
-              {field.name === 'password' && <PasswordStrength password={formData.password} />}
-            </FormInput>
-          ))}
+          <div className="col-span-1">
+            <Input name="firstname" label="First Name" value={formData.firstname} onChange={handleChange} />
+          </div>
+
+          <div className="col-span-1">
+            <Input name="lastname" label="Last Name" value={formData.lastname} onChange={handleChange} />
+          </div>
+
+          <div className="col-span-2">
+            <Input name="username" label="Username" value={formData.username} onChange={handleChange} />
+          </div>
+
+          <div className="col-span-2">
+            <Input name="email" label="Email" type="email" value={formData.email} onChange={handleChange} />
+          </div>
+
+          <div className="col-span-2">
+            <Input name="password" label="Password" type="password" value={formData.password} onChange={handleChange} />
+            <div className="mt-2">
+              <PasswordStrength password={formData.password} />
+            </div>
+          </div>
+
+          <div className="col-span-2">
+            <Input
+              name="confirmPassword"
+              label="Confirm Password"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
+          </div>
 
           <div className="col-span-2 mt-4">
-            <button
-              type="submit"
-              className="w-full py-3 text-white font-semibold rounded-lg bg-primary1 hover:bg-hover transform transition-all duration-200 shadow-md hover:shadow-lg focus:ring-2 focus:ring-offset-2 focus:ring-primary1"
-            >
+            <Button type="submit" loading={loading} className="w-full">
               Sign Up
-            </button>
+            </Button>
           </div>
         </form>
 
@@ -83,7 +104,7 @@ const Register = () => {
             Log in
           </Link>
         </p>
-      </div>
+      </Card>
     </div>
   );
 };

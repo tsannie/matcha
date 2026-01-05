@@ -1,13 +1,14 @@
-import { useEffect, useState, useRef } from 'react'; // 1. Import useRef
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState('verifying');
-  // strict mode double call
   const effectRan = useRef(false);
 
   useEffect(() => {
@@ -30,7 +31,6 @@ const VerifyEmail = () => {
           navigate('/login');
         }, 3000);
       } catch (error) {
-        // En prod, ça n'arrivera pas, mais en dev, ça évite le flash rouge
         console.error(error);
         setStatus('error');
         const msg = error.response?.data?.error || 'Verification failed.';
@@ -47,42 +47,60 @@ const VerifyEmail = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-bg p-4">
-      <div className="w-full max-w-md p-8 bg-white shadow-xl rounded-xl border border-primary3/30 text-center">
+      <Card className="w-full max-w-md text-center">
         {status === 'verifying' && (
-          <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary1 mb-4"></div>
+          <div className="flex flex-col items-center py-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-primary1 mb-6"></div>
             <h2 className="text-2xl font-bold text-gray-700">Verifying your account...</h2>
-            <p className="text-gray-500 mt-2">Please wait a moment.</p>
+            <p className="text-gray-500 mt-2">Please wait a moment while we validate your email.</p>
           </div>
         )}
 
         {status === 'success' && (
-          <div>
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-              <span className="text-2xl text-green-600">✔</span>
+          <div className="flex flex-col items-center py-4">
+            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-600 mb-6">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
             <h2 className="text-2xl font-bold text-primary1">Verified!</h2>
             <p className="text-gray-600 mt-2">Your email has been successfully verified.</p>
-            <p className="text-sm text-gray-400 mt-4">Redirecting you to login...</p>
+            <p className="text-sm text-gray-400 mt-6 animate-pulse">Redirecting you to login...</p>
           </div>
         )}
 
         {status === 'error' && (
-          <div>
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-              <span className="text-2xl text-red-600">✖</span>
+          <div className="flex flex-col items-center py-4">
+            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-red-100 text-red-600 mb-6">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </div>
             <h2 className="text-2xl font-bold text-red-600">Verification Failed</h2>
             <p className="text-gray-600 mt-2">The link is invalid or has expired.</p>
-            <button
-              onClick={() => navigate('/login')}
-              className="mt-6 px-4 py-2 bg-primary1 text-white rounded hover:bg-hover transition-colors"
-            >
-              Back to Login
-            </button>
+
+            <div className="mt-8 w-full">
+              <Button onClick={() => navigate('/login')} className="w-full">
+                Back to Login
+              </Button>
+            </div>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 };

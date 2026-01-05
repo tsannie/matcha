@@ -100,7 +100,7 @@ export const forgotPassword = async (req, res) => {
     const token = crypto.randomBytes(32).toString('hex');
     const expires = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
 
-    await pool.query('UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE email = $3', [
+    await pool.query('UPDATE users SET reset_password_token = $1, reset_password_expires = $2 WHERE email = $3', [
       token,
       expires,
       email,
@@ -122,7 +122,7 @@ export const resetPassword = async (req, res) => {
   if (error) return res.status(400).json({ error });
 
   try {
-    const userCheck = await pool.query('SELECT * FROM users WHERE reset_token = $1', [token]);
+    const userCheck = await pool.query('SELECT * FROM users WHERE reset_password_token = $1', [token]);
 
     if (userCheck.rows.length === 0) {
       return res.status(400).json({ error: 'Invalid or expired token.' });
@@ -131,16 +131,16 @@ export const resetPassword = async (req, res) => {
     const user = userCheck.rows[0];
     const now = new Date();
 
-    if (parseInt(user.reset_token_expires) < now) {
+    if (parseInt(user.reset_password_expires) < now) {
       return res.status(400).json({ error: 'Token has expired. Please request a new one.' });
     }
 
     const hashedPassword = await hashPassword(newPassword);
 
-    await pool.query('UPDATE users SET password = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2', [
-      hashedPassword,
-      user.id,
-    ]);
+    await pool.query(
+      'UPDATE users SET password = $1, reset_password_token = NULL, reset_password_expires = NULL WHERE id = $2',
+      [hashedPassword, user.id]
+    );
 
     res
       .status(200)

@@ -3,7 +3,11 @@ import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
 
-// Import des sous-composants
+// UI Components
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
+
+// Steps Components
 import AboutStep from '../components/profile-steps/AboutStep';
 import InterestsStep from '../components/profile-steps/InterestsStep';
 import PhotosStep from '../components/profile-steps/PhotosStep';
@@ -45,8 +49,6 @@ const CompleteProfile = () => {
     fetchProfile();
   }, []);
 
-  // --- ACTIONS GLOBALES ---
-
   const updateField = (field, value) => {
     setProfile({ ...profile, [field]: value });
   };
@@ -54,8 +56,6 @@ const CompleteProfile = () => {
   const updateTags = (newTags) => {
     setProfile({ ...profile, tags: newTags });
   };
-
-  // --- ACTIONS PHOTOS (API Calls directs) ---
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -107,8 +107,6 @@ const CompleteProfile = () => {
     }
   };
 
-  // --- ACTIONS LOCATION ---
-
   const handleLocateMe = () => {
     if (!navigator.geolocation) return toast.error('Geolocation not supported');
     setLoading(true);
@@ -130,17 +128,12 @@ const CompleteProfile = () => {
     );
   };
 
-  // --- NAVIGATION (Next/Back) ---
-
   const handleNext = async () => {
     try {
       setLoading(true);
 
       if (currentStep === 1 || currentStep === 4) {
-        console.log('Updating profile info...');
-        console.log(profile);
-        console.log('step:', currentStep);
-        await api.put('/profile/', {
+        await api.put('/profile', {
           gender: profile.gender,
           sexual_preference: profile.sexual_preference,
           biography: profile.biography,
@@ -181,7 +174,7 @@ const CompleteProfile = () => {
 
   return (
     <div className="min-h-screen bg-bg flex flex-col items-center py-10 px-4">
-      {/* HEADER / PROGRESS */}
+      {/* HEADER / PROGRESS BAR */}
       <div className="w-full max-w-2xl mb-8">
         <h1 className="text-3xl font-bold text-primary1 text-center mb-6">Complete your Profile</h1>
         <div className="flex justify-between items-center relative">
@@ -210,13 +203,11 @@ const CompleteProfile = () => {
         </div>
       </div>
 
-      {/* CARD CONTENT */}
-      <div className="w-full max-w-2xl bg-white p-8 rounded-xl shadow-lg border border-primary3/30 min-h-[450px] flex flex-col">
+      {/* COMPOSANT CARD : Remplace la div blanche manuelle */}
+      <Card className="w-full max-w-2xl min-h-[450px] flex flex-col">
         <div className="flex-grow">
           {currentStep === 1 && <AboutStep data={profile} onChange={updateField} />}
-
           {currentStep === 2 && <InterestsStep tags={profile.tags} setTags={updateTags} />}
-
           {currentStep === 3 && (
             <PhotosStep
               images={profile.images}
@@ -225,7 +216,6 @@ const CompleteProfile = () => {
               onSetProfile={handleSetProfilePic}
             />
           )}
-
           {currentStep === 4 && (
             <LocationStep
               latitude={profile.latitude}
@@ -236,27 +226,25 @@ const CompleteProfile = () => {
           )}
         </div>
 
-        {/* FOOTER ACTIONS */}
+        {/* FOOTER ACTIONS : Remplace les boutons manuels */}
         <div className="flex justify-between mt-8 pt-4 border-t border-gray-100">
-          <button
+          <Button
+            secondary={true}
             onClick={() => currentStep > 1 && setCurrentStep(currentStep - 1)}
             disabled={currentStep === 1 || loading}
-            className={`px-6 py-2 rounded-lg text-gray-600 font-medium hover:bg-gray-100 transition ${
-              currentStep === 1 ? 'opacity-0 pointer-events-none' : ''
-            }`}
+            className={currentStep === 1 ? 'opacity-0 pointer-events-none' : ''}
           >
             Back
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={handleNext}
-            disabled={loading}
-            className="px-8 py-2 bg-primary1 text-white font-bold rounded-lg hover:bg-hover shadow-md hover:shadow-lg transform transition-all active:scale-95 disabled:opacity-70"
+            disabled={loading} // Si ton Button gère 'isLoading', tu peux mettre isLoading={loading}
           >
             {loading ? 'Saving...' : currentStep === STEPS.length ? 'Finish' : 'Next'}
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

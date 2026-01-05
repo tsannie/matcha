@@ -2,12 +2,16 @@ import { useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
-import PasswordStrength from '../components/PasswordStrength'; // Import du composant partagé
+import Card from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
+import PasswordStrength from '../components/PasswordStrength';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const token = searchParams.get('token');
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     newPassword: '',
@@ -23,6 +27,8 @@ const ResetPassword = () => {
       return toast.error('Passwords do not match.');
     }
 
+    setLoading(true);
+
     try {
       await api.post('/auth/reset-password', {
         token,
@@ -34,55 +40,60 @@ const ResetPassword = () => {
     } catch (error) {
       const msg = error.response?.data?.error || 'Failed to reset password.';
       toast.error(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
   if (!token) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-bg p-4">
-        <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-4">Invalid or missing reset token.</div>
-        <Link to="/login" className="text-primary1 hover:underline">
-          Return to Login
-        </Link>
+        <Card className="w-full max-w-md text-center">
+          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6">
+            ⚠️ Invalid or missing reset token.
+          </div>
+          <Link to="/login" className="text-primary1 hover:underline font-bold">
+            Return to Login
+          </Link>
+        </Card>
       </div>
     );
   }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-bg p-4">
-      <div className="w-full max-w-md p-8 bg-white shadow-xl rounded-xl border border-primary3/30">
+      <Card className="w-full max-w-md">
         <h2 className="mb-8 text-3xl font-bold text-center text-primary1">Set New Password</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-primary2 mb-1">New Password</label>
-            <input
+            <Input
+              label="New Password"
               type="password"
-              required
-              className="w-full px-3 py-2 border border-primary3 rounded-md focus:outline-none focus:ring-2 focus:ring-primary1 focus:border-transparent bg-white"
+              value={formData.newPassword}
               onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
+              required
             />
-            <PasswordStrength password={formData.newPassword} />
+            <div className="mt-2">
+              <PasswordStrength password={formData.newPassword} />
+            </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-primary2 mb-1">Confirm New Password</label>
-            <input
+            <Input
+              label="Confirm New Password"
               type="password"
-              required
-              className="w-full px-3 py-2 border border-primary3 rounded-md focus:outline-none focus:ring-2 focus:ring-primary1 focus:border-transparent bg-white"
+              value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+              required
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full py-3 text-white font-semibold rounded-lg bg-primary1 hover:bg-hover transform transition-all duration-200 shadow-md"
-          >
+          <Button type="submit" loading={loading} className="w-full">
             Update Password
-          </button>
+          </Button>
         </form>
-      </div>
+      </Card>
     </div>
   );
 };
