@@ -2,19 +2,16 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
-
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
-
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ username: '', password: '' });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,17 +23,15 @@ const Login = () => {
 
     try {
       const response = await api.post('/auth/login', formData);
+      const { token } = response.data;
 
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
+      await login(token);
 
-      toast.success(`Welcome back, ${user.username}!`);
+      toast.success('Welcome back!');
       navigate('/');
     } catch (error) {
       const errorMessage = error.response?.data?.error || 'Invalid credentials';
       toast.error(errorMessage);
-      console.error(error);
-    } finally {
       setLoading(false);
     }
   };
