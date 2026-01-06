@@ -1,59 +1,85 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import { useAuth, checkProfileComplete } from '../context/AuthContext';
+import api from '../api/axios';
+import FilterSidebar from '../components/FilterSidebar';
+import ProfileCard from '../components/ProfileCard';
+import { useAuth } from '../context/AuthContext';
 
 const Home = () => {
   const navigate = useNavigate();
-  const { user, logout, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+
+  const [profiles, setProfiles] = useState([]);
+  const [loadingProfiles, setLoadingProfiles] = useState(true);
+
+  const [filters, setFilters] = useState({
+    age: [18, 50],
+    fame: [0, 100],
+    distance: 50,
+    active: {
+      age: true,
+      fame: true,
+      distance: true,
+      tags: false,
+    },
+  });
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/login');
-      return;
-    }
+    if (!authLoading && !user) return;
 
-    if (!loading && user && !checkProfileComplete(user)) {
-      navigate('/complete-profile');
-    }
-  }, [user, loading, navigate]);
+    const fetchProfiles = async () => {
+      try {
+        setLoadingProfiles(true);
+        const res = await api.get('/browsing/recommendations');
+        setProfiles(res.data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoadingProfiles(false);
+      }
+    };
 
-  if (loading || !user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-bg">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary1 border-t-transparent"></div>
-      </div>
-    );
-  }
+    if (user) fetchProfiles();
+  }, [user, authLoading]);
+
+  const filteredProfiles = useMemo(() => {
+    return profiles.filter((p) => {
+      if (filters.active.age && (p.age < filters.age[0] || p.age > filters.age[1])) return false;
+      if (filters.active.fame && (p.fame_rating < filters.fame[0] || p.fame_rating > filters.fame[1])) return false;
+      if (filters.active.distance && (p.distance || 0) > filters.distance) return false;
+      return true;
+    });
+  }, [profiles, filters]);
+
+  if (authLoading) return null;
 
   return (
-    <div className="min-h-screen bg-bg p-8">
-      <Card className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-primary1 mb-4">Welcome to Matcha 🍵</h1>
+    <div className="w-full bg-bg px-4 py-8 flex flex-col lg:flex-row gap-8 items-start justify-center max-w-[1600px] mx-auto">
+      <FilterSidebar filters={filters} setFilters={setFilters} />
 
-        <p className="text-gray-700 mb-6">
-          You are successfully logged in as <span className="font-bold">{user.username}</span>.
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-            <h3 className="font-bold text-green-700">Profile Status</h3>
-            <p className="text-green-600 text-sm mt-1">Your profile is complete and visible to others.</p>
+      <div className="flex-grow w-full">
+        <div className="mb-6 flex justify-between items-end">
+          <div>
+            <h1 className="text-2xl font-bold text-primary1">Discover</h1>
+            <p className="text-gray-500 text-sm">{filteredProfiles.length} profiles found around you</p>
           </div>
-          {/* ... */}
         </div>
 
-        <Button
-          onClick={() => {
-            logout();
-            navigate('/login');
-          }}
-          className="bg-red-500 hover:bg-red-600 text-white"
-        >
-          Logout
-        </Button>
-      </Card>
+        {loadingProfiles ? (
+          <div className="text-center py-20 animate-pulse text-gray-400">Loading profiles...</div>
+        ) : filteredProfiles.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProfiles.map((profile) => (
+              <ProfileCard key={profile.id} user={profile} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20 bg-white rounded-xl border border-gray-100 shadow-sm">
+            <p className="text-xl text-gray-400 mb-2">No matches found 😢</p>
+            <p className="text-sm text-gray-500">Try adjusting your filters to see more people.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

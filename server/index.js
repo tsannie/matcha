@@ -7,6 +7,7 @@ import { runDatabaseMigration } from './utils/dbInit.js';
 
 import authRoutes from './routes/authRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
+import browsingRoutes from './routes/browsingRoutes.js';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.use('/api/browsing', browsingRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

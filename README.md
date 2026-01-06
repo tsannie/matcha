@@ -17,7 +17,9 @@ P@$$w0rd123?
 
 # To reset the database, run the following command:
 
-docker run --rm -v "$PWD":/app -w /app alpine rm -rf data
+# Seed the database with initial data:
+
+docker exec -it matcha_server pnpm seed
 
 https://www.drawdb.app/editor?shareId=20ccfdcee9dffba1be9b435bf890e74b
 
@@ -30,3 +32,7 @@ curl -X DELETE http://localhost:5000/api/profile/images/1 \
 
 curl -X GET http://localhost:5000/api/profile \
  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ0aGVvIiwiaWF0IjoxNzY0MzQ1MTcwLCJleHAiOjE3NjQzNDg3NzB9.q1zvVeAPL2vzV9X4MMF7PeNSY8RJeTjbnRnJYynOs3I"
+
+# TODO LIST
+
+- fix location pb in complete profile
