@@ -9,9 +9,9 @@ const AboutStep = ({ data, onChange }) => {
   ];
 
   const orientationOptions = [
-    { value: 'bisexual', label: 'Everyone (Bisexual)' },
     { value: 'heterosexual', label: 'Opposite Gender' },
     { value: 'homosexual', label: 'Same Gender' },
+    { value: 'bisexual', label: 'Everyone (Bisexual)' },
   ];
 
   return (
@@ -21,16 +21,20 @@ const AboutStep = ({ data, onChange }) => {
       <div className="grid grid-cols-2 gap-4">
         <Select
           label="I am a..."
-          value={data.gender || 'male'}
+          value={data.gender || ''}
           onChange={(e) => onChange('gender', e.target.value)}
           options={genderOptions}
+          placeholder="Select your gender"
+          required
         />
 
         <Select
           label="Looking for..."
-          value={data.sexual_preference || 'bisexual'}
+          value={data.sexual_preference || ''}
           onChange={(e) => onChange('sexual_preference', e.target.value)}
           options={orientationOptions}
+          placeholder="Select preference"
+          required
         />
       </div>
 
@@ -40,6 +44,7 @@ const AboutStep = ({ data, onChange }) => {
         onChange={(e) => onChange('biography', e.target.value)}
         placeholder="Write a few lines about what you like..."
         maxLength={500}
+        required
       />
     </div>
   );

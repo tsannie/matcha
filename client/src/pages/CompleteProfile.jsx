@@ -19,7 +19,7 @@ const STEPS = [
 
 const CompleteProfile = () => {
   const navigate = useNavigate();
-  const { user, updateUser, loading: authLoading } = useAuth();
+  const { user, updateUser, logout, loading: authLoading } = useAuth();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [saving, setSaving] = useState(false);
@@ -118,6 +118,19 @@ const CompleteProfile = () => {
     );
   };
 
+  const isStepValid = () => {
+    if (currentStep === 1) {
+      return profile.gender && profile.sexual_preference && profile.biography?.trim();
+    }
+    if (currentStep === 2) {
+      return profile.tags.length > 0;
+    }
+    if (currentStep === 3) {
+      return profile.images.length > 0;
+    }
+    return true;
+  };
+
   const handleNext = async () => {
     setSaving(true);
     try {
@@ -134,19 +147,8 @@ const CompleteProfile = () => {
       }
 
       if (currentStep === 2) {
-        if (profile.tags.length === 0) {
-          toast.error('Add at least one tag');
-          setSaving(false);
-          return;
-        }
         await api.put('/profile/tags', { tags: profile.tags });
         updateUser({ tags: profile.tags });
-      }
-
-      if (currentStep === 3 && profile.images.length === 0) {
-        toast.error('Upload at least one photo');
-        setSaving(false);
-        return;
       }
 
       setSaving(false);
@@ -166,9 +168,21 @@ const CompleteProfile = () => {
 
   if (authLoading) return <div className="flex justify-center p-10">Loading...</div>;
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen bg-bg flex flex-col items-center py-10 px-4">
-      <div className="w-full max-w-2xl mb-8">{/* ... ProgressBar Code ... */}</div>
+      <div className="w-full max-w-2xl flex justify-end mb-4">
+        <button
+          onClick={handleLogout}
+          className="text-sm text-gray-500 hover:text-red-500 transition-colors"
+        >
+          Log out
+        </button>
+      </div>
 
       <Card className="w-full max-w-2xl min-h-[450px] flex flex-col">
         <div className="flex-grow">
@@ -202,7 +216,7 @@ const CompleteProfile = () => {
             Back
           </Button>
 
-          <Button onClick={handleNext} loading={saving}>
+          <Button onClick={handleNext} loading={saving} disabled={!isStepValid()}>
             {currentStep === STEPS.length ? 'Finish' : 'Next'}
           </Button>
         </div>

@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS users (
 
   -- Profile Data
   gender VARCHAR(10),
-  sexual_preference VARCHAR(20) DEFAULT 'bisexual',
+  sexual_preference VARCHAR(20),
+  birthdate DATE,
   biography TEXT,
   fame_rating INT DEFAULT 0,
   latitude FLOAT,

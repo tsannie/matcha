@@ -27,7 +27,7 @@ export const getProfile = async (req, res) => {
 
   try {
     const userResult = await pool.query(
-      'SELECT id, username, email, firstname, lastname, gender, sexual_preference, biography, fame_rating, latitude, longitude, profile_complete FROM users WHERE id = $1',
+      'SELECT id, username, email, firstname, lastname, gender, sexual_preference, birthdate, biography, fame_rating, latitude, longitude, profile_complete FROM users WHERE id = $1',
       [userId]
     );
 
@@ -48,7 +48,7 @@ export const getProfile = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   const userId = req.user.id;
-  const { gender, sexual_preference, biography, latitude, longitude } = req.body;
+  const { gender, sexual_preference, birthdate, biography, latitude, longitude } = req.body;
 
   const error = validateProfileUpdate(req.body);
   if (error) return res.status(400).json({ error });
@@ -59,14 +59,15 @@ export const updateProfile = async (req, res) => {
       SET
         gender = COALESCE($1, gender),
         sexual_preference = COALESCE($2, sexual_preference),
-        biography = COALESCE($3, biography),
-        latitude = COALESCE($4, latitude),
-        longitude = COALESCE($5, longitude)
-      WHERE id = $6
+        birthdate = COALESCE($3, birthdate),
+        biography = COALESCE($4, biography),
+        latitude = COALESCE($5, latitude),
+        longitude = COALESCE($6, longitude)
+      WHERE id = $7
       RETURNING *;
     `;
 
-    const result = await pool.query(query, [gender, sexual_preference, biography, latitude, longitude, userId]);
+    const result = await pool.query(query, [gender, sexual_preference, birthdate, biography, latitude, longitude, userId]);
 
     res.json({ message: 'Profile updated', user: result.rows[0] });
   } catch (err) {

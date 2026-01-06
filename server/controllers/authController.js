@@ -7,9 +7,9 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
 export const register = async (req, res) => {
-  const { email, username, password, firstname, lastname } = req.body;
+  const { email, username, password, firstname, lastname, birthdate } = req.body;
 
-  const error = validateRegistration(email, username, password, firstname, lastname);
+  const error = validateRegistration(email, username, password, firstname, lastname, birthdate);
   if (error) return res.status(400).json({ error });
 
   try {
@@ -24,9 +24,9 @@ export const register = async (req, res) => {
     const verifyToken = crypto.randomBytes(32).toString('hex');
 
     const newUser = await pool.query(
-      `INSERT INTO users (email, username, firstname, lastname, password, token)
-             VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, username, email`,
-      [email, username, firstname, lastname, hashedPassword, verifyToken]
+      `INSERT INTO users (email, username, firstname, lastname, birthdate, password, token)
+             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, username, email`,
+      [email, username, firstname, lastname, birthdate, hashedPassword, verifyToken]
     );
 
     await sendVerificationEmail(email, verifyToken);
@@ -56,6 +56,10 @@ export const login = async (req, res) => {
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    if (!user.verified) {
+      return res.status(403).json({ error: 'Please verify your email before logging in.' });
     }
 
     const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });

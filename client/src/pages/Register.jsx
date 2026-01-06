@@ -16,9 +16,19 @@ const Register = () => {
     lastname: '',
     username: '',
     email: '',
+    birthdate: '',
     password: '',
     confirmPassword: '',
   });
+
+  // Calculate max date (18 years ago)
+  const today = new Date();
+  const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate())
+    .toISOString()
+    .split('T')[0];
+  const minDate = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate())
+    .toISOString()
+    .split('T')[0];
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,6 +36,16 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate birthdate (must be 18+)
+    if (!formData.birthdate) {
+      return toast.error('Date of birth is required.');
+    }
+    const birthDate = new Date(formData.birthdate);
+    const age = Math.floor((new Date() - birthDate) / (365.25 * 24 * 60 * 60 * 1000));
+    if (age < 18) {
+      return toast.error('You must be at least 18 years old to register.');
+    }
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (!passwordRegex.test(formData.password)) {
@@ -59,23 +79,36 @@ const Register = () => {
 
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-5">
           <div className="col-span-1">
-            <Input name="firstname" label="First Name" value={formData.firstname} onChange={handleChange} />
+            <Input name="firstname" label="First Name" value={formData.firstname} onChange={handleChange} required />
           </div>
 
           <div className="col-span-1">
-            <Input name="lastname" label="Last Name" value={formData.lastname} onChange={handleChange} />
+            <Input name="lastname" label="Last Name" value={formData.lastname} onChange={handleChange} required />
           </div>
 
           <div className="col-span-2">
-            <Input name="username" label="Username" value={formData.username} onChange={handleChange} />
+            <Input name="username" label="Username" value={formData.username} onChange={handleChange} required />
           </div>
 
           <div className="col-span-2">
-            <Input name="email" label="Email" type="email" value={formData.email} onChange={handleChange} />
+            <Input name="email" label="Email" type="email" value={formData.email} onChange={handleChange} required />
           </div>
 
           <div className="col-span-2">
-            <Input name="password" label="Password" type="password" value={formData.password} onChange={handleChange} />
+            <Input
+              name="birthdate"
+              label="Date of Birth"
+              type="date"
+              value={formData.birthdate}
+              onChange={handleChange}
+              max={maxDate}
+              min={minDate}
+              required
+            />
+          </div>
+
+          <div className="col-span-2">
+            <Input name="password" label="Password" type="password" value={formData.password} onChange={handleChange} required />
             <div className="mt-2">
               <PasswordStrength password={formData.password} />
             </div>
@@ -88,6 +121,7 @@ const Register = () => {
               type="password"
               value={formData.confirmPassword}
               onChange={handleChange}
+              required
             />
           </div>
 

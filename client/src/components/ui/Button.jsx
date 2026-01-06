@@ -4,7 +4,7 @@ const Button = ({ children, onClick, type = 'button', disabled, loading, seconda
   const isDisabled = disabled || loading;
 
   const baseStyle =
-    'px-6 py-2 rounded-lg font-bold flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed';
+    'px-6 py-2 rounded-lg font-bold flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none';
   const primaryStyle = 'bg-primary1 text-white hover:opacity-90 shadow-md';
   const secondaryStyle = 'bg-gray-200 text-gray-800 hover:bg-gray-300';
 

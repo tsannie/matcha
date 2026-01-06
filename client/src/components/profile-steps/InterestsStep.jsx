@@ -46,7 +46,9 @@ const InterestsStep = ({ tags, setTags }) => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <h2 className="text-xl font-semibold text-gray-700">Your Interests</h2>
+      <h2 className="text-xl font-semibold text-gray-700">
+        Your Interests<span className="text-red-500 ml-1">*</span>
+      </h2>
       <p className="text-gray-500 text-sm">Type a tag and press Space or Enter (ex: vegan, geek, gym...)</p>
 
       {/* Le conteneur change de style si désactivé */}

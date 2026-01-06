@@ -39,6 +39,7 @@ const ForgotPassword = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             name="email"
+            required
           />
 
           <Button type="submit" loading={loading} className="w-full">

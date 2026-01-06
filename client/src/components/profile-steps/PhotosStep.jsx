@@ -7,7 +7,9 @@ const PhotosStep = ({ images, onUpload, onDelete, onSetProfile }) => {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-700">Your Photos</h2>
+        <h2 className="text-xl font-semibold text-gray-700">
+          Your Photos<span className="text-red-500 ml-1">*</span>
+        </h2>
         <span className="text-sm text-gray-500">{images.length}/5</span>
       </div>
 

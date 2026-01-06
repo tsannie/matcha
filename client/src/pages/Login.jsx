@@ -42,10 +42,10 @@ const Login = () => {
         <h2 className="mb-8 text-3xl font-bold text-center text-primary1">Welcome Back</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <Input name="username" label="Username" value={formData.username} onChange={handleChange} />
+          <Input name="username" label="Username" value={formData.username} onChange={handleChange} required />
 
           <div>
-            <Input name="password" label="Password" type="password" value={formData.password} onChange={handleChange} />
+            <Input name="password" label="Password" type="password" value={formData.password} onChange={handleChange} required />
             <div className="flex justify-end mt-1">
               <Link to="/forgot-password" className="text-xs text-primary1 hover:text-hover hover:underline">
                 Forgot password?

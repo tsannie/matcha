@@ -30,16 +30,39 @@ export const hashPassword = async (plainPassword) => {
   return await bcrypt.hash(plainPassword, saltRounds);
 };
 
+const validateBirthdate = (birthdate, required = false) => {
+  if (!birthdate) return required ? 'Date of birth is required.' : null;
+
+  const date = new Date(birthdate);
+  if (isNaN(date.getTime())) {
+    return 'Invalid birthdate format.';
+  }
+
+  const today = new Date();
+  const age = Math.floor((today - date) / (365.25 * 24 * 60 * 60 * 1000));
+
+  if (age < 18) {
+    return 'You must be at least 18 years old.';
+  }
+  if (age > 120) {
+    return 'Invalid birthdate.';
+  }
+
+  return null;
+};
+
 /* --- AUTH VALIDATION --- */
 
-export const validateRegistration = (email, username, password, firstname, lastname) => {
-  if (!email || !username || !password || !firstname || !lastname) {
+export const validateRegistration = (email, username, password, firstname, lastname, birthdate) => {
+  if (!email || !username || !password || !firstname || !lastname || !birthdate) {
     return 'All fields are required.';
   }
   const invalidPassword = validatePasswordComplexity(password);
   const invalidEmail = validateEmail(email);
+  const invalidBirthdate = validateBirthdate(birthdate, true);
   if (invalidPassword) return invalidPassword;
   if (invalidEmail) return invalidEmail;
+  if (invalidBirthdate) return invalidBirthdate;
 
   return null;
 };
@@ -56,7 +79,7 @@ export const validateResetPassword = (newPassword) => {
 /* --- PROFILE VALIDATION --- */
 
 export const validateProfileUpdate = (data) => {
-  const { gender, sexual_preference, biography, latitude, longitude } = data;
+  const { gender, sexual_preference, birthdate, biography, latitude, longitude } = data;
 
   const validGenders = ['male', 'female'];
   if (gender && !validGenders.includes(gender)) {
@@ -67,6 +90,9 @@ export const validateProfileUpdate = (data) => {
   if (sexual_preference && !validPreferences.includes(sexual_preference)) {
     return `Invalid sexual preference. Allowed values: ${validPreferences.join(', ')}`;
   }
+
+  const birthdateError = validateBirthdate(birthdate);
+  if (birthdateError) return birthdateError;
 
   if (biography && biography.length > 500) {
     return 'Biography is too long (max 500 characters).';
