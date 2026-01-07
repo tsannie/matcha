@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,7 +12,7 @@ const __dirname = dirname(__filename);
 dotenv.config({ path: join(__dirname, '.env') });
 
 if (!process.env.DB_PASSWORD) {
-  console.error('❌ Erreur: DB_PASSWORD est introuvable. Vérifie ton fichier .env');
+  console.error('❌ Error: DB_PASSWORD not found. Check your .env file');
   process.exit(1);
 }
 
@@ -28,6 +29,7 @@ const pool = new Pool({
 const USERS_TO_CREATE = 50;
 const PARIS_LAT = 48.8566;
 const PARIS_LON = 2.3522;
+const CREDENTIALS_FILE = 'users_credentials.txt';
 
 const TAGS_LIST = [
   'Vegan',
@@ -52,7 +54,11 @@ const seed = async () => {
     console.log('🌱 Starting seed...');
     console.log(`Connecting to database: ${process.env.DB_NAME} as ${process.env.DB_USER}`);
 
-    await pool.query('TRUNCATE notifications, blocks, reports, profile_views, likes, user_images, user_tags, tags, users RESTART IDENTITY CASCADE');
+    fs.writeFileSync(CREDENTIALS_FILE, '--- USERS CREDENTIALS ---\n\n');
+
+    await pool.query(
+      'TRUNCATE notifications, blocks, reports, profile_views, likes, user_images, user_tags, tags, users RESTART IDENTITY CASCADE'
+    );
 
     const tagIds = [];
     for (const tagName of TAGS_LIST) {
@@ -63,7 +69,6 @@ const seed = async () => {
     const hashedPassword = await bcrypt.hash('Password123!', 10);
 
     for (let i = 0; i < USERS_TO_CREATE; i++) {
-      // Sexe déterminé (male/female)
       const sex = faker.person.sexType();
       const firstname = faker.person.firstName(sex);
       const lastname = faker.person.lastName();
@@ -111,6 +116,11 @@ const seed = async () => {
       );
       const userId = userRes.rows[0].id;
 
+      fs.appendFileSync(
+        CREDENTIALS_FILE,
+        `Email: ${email.padEnd(35)} | Username: ${username.padEnd(20)} | Password: Password123!\n`
+      );
+
       const shuffledTags = [...tagIds].sort(() => 0.5 - Math.random());
       const selectedTags = shuffledTags.slice(0, Math.floor(Math.random() * 4) + 1);
 
@@ -121,10 +131,6 @@ const seed = async () => {
       const numImages = Math.floor(Math.random() * 5) + 1;
       for (let j = 0; j < numImages; j++) {
         const isProfile = j === 0;
-
-        // MODIFICATION ICI : Utilisation de xsgames avec le bon genre
-        // On ajoute un paramètre bidon &key=${j} pour que l'URL soit unique
-        // et que le navigateur ne mette pas en cache la même image pour tout le monde.
         const imageUrl = `https://xsgames.co/randomusers/avatar.php?g=${sex}&key=${userId}-${j}`;
 
         await pool.query(`INSERT INTO user_images (user_id, file_path, is_profile_picture) VALUES ($1, $2, $3)`, [
@@ -139,11 +145,9 @@ const seed = async () => {
 
     console.log('\n📊 Creating likes and interactions...');
 
-    // Get all user IDs
     const allUsersResult = await pool.query('SELECT id FROM users ORDER BY id');
     const userIds = allUsersResult.rows.map((row) => row.id);
 
-    // Generate random likes (about 30% of possible combinations)
     const likesToCreate = Math.floor((userIds.length * userIds.length * 0.3) / 2);
     const createdLikes = new Set();
 
@@ -151,18 +155,14 @@ const seed = async () => {
       const likerId = userIds[Math.floor(Math.random() * userIds.length)];
       const likedId = userIds[Math.floor(Math.random() * userIds.length)];
 
-      // Avoid self-likes and duplicates
       if (likerId !== likedId && !createdLikes.has(`${likerId}-${likedId}`)) {
         try {
           await pool.query('INSERT INTO likes (liker_id, liked_id) VALUES ($1, $2)', [likerId, likedId]);
           createdLikes.add(`${likerId}-${likedId}`);
-        } catch (err) {
-          // Ignore duplicate errors
-        }
+        } catch (err) {}
       }
     }
 
-    // Create some mutual matches (about 10% of users)
     const matchesToCreate = Math.floor(userIds.length * 0.1);
     for (let i = 0; i < matchesToCreate; i++) {
       const user1 = userIds[Math.floor(Math.random() * userIds.length)];
@@ -178,15 +178,12 @@ const seed = async () => {
             user2,
             user1,
           ]);
-        } catch (err) {
-          // Ignore errors
-        }
+        } catch (err) {}
       }
     }
 
     console.log(`✅ Created ${createdLikes.size} likes and ~${matchesToCreate} mutual matches`);
 
-    // Generate random profile views (about 40% of possible combinations)
     const viewsToCreate = Math.floor((userIds.length * userIds.length * 0.4) / 2);
     const createdViews = new Set();
 
@@ -198,15 +195,12 @@ const seed = async () => {
         try {
           await pool.query('INSERT INTO profile_views (viewer_id, viewed_id) VALUES ($1, $2)', [viewerId, viewedId]);
           createdViews.add(`${viewerId}-${viewedId}`);
-        } catch (err) {
-          // Ignore duplicate errors
-        }
+        } catch (err) {}
       }
     }
 
     console.log(`✅ Created ${createdViews.size} profile views`);
 
-    // Generate a few random blocks (about 2% of users)
     const blocksToCreate = Math.floor(userIds.length * 0.02);
     for (let i = 0; i < blocksToCreate; i++) {
       const blockerId = userIds[Math.floor(Math.random() * userIds.length)];
@@ -218,15 +212,12 @@ const seed = async () => {
             blockerId,
             blockedId,
           ]);
-        } catch (err) {
-          // Ignore errors
-        }
+        } catch (err) {}
       }
     }
 
     console.log(`✅ Created ${blocksToCreate} blocks`);
 
-    // Update fame ratings based on likes and views
     console.log('📈 Updating fame ratings...');
     await pool.query(`
       UPDATE users
@@ -241,10 +232,11 @@ const seed = async () => {
       )
     `);
 
-    console.log(`\n✅ Seed terminé avec succès ! ${USERS_TO_CREATE} utilisateurs créés avec interactions.`);
+    console.log(`\n✅ Seed completed successfully!`);
+    console.log(`📄 Credentials saved to ${CREDENTIALS_FILE}`);
     process.exit(0);
   } catch (err) {
-    console.error('\n❌ Erreur pendant le seed:', err);
+    console.error('\n❌ Error during seed:', err);
     process.exit(1);
   }
 };

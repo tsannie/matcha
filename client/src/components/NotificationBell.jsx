@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNotifications } from '../context/NotificationContext';
 import { formatDistanceToNow } from 'date-fns';
+// Import du SVG en tant que composant React pour garder le contrôle sur la couleur (currentColor)
+import BellIcon from '../assets/icons/bell.svg?react';
 
 const NotificationBell = () => {
   const { notifications, unreadCount, markAsRead } = useNotifications();
@@ -26,7 +28,6 @@ const NotificationBell = () => {
 
   const handleToggle = () => {
     if (!isOpen) {
-      // Mark as read when opening
       markAsRead();
     }
     setIsOpen(!isOpen);
@@ -66,20 +67,9 @@ const NotificationBell = () => {
         onClick={handleToggle}
         className="relative p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
-          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
-        </svg>
+        {/* Utilisation du SVG importé */}
+        <BellIcon width="24" height="24" />
+
         {unreadCount > 0 && (
           <span className="absolute top-1 right-1 h-5 w-5 bg-red-500 rounded-full border-2 border-white flex items-center justify-center text-[10px] text-white font-bold">
             {unreadCount > 9 ? '9+' : unreadCount}
@@ -99,21 +89,7 @@ const NotificationBell = () => {
           <div className="overflow-y-auto flex-grow">
             {notifications.length === 0 ? (
               <div className="p-8 text-center text-gray-400">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="48"
-                  height="48"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="mx-auto mb-2 opacity-50"
-                >
-                  <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
-                  <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
-                </svg>
+                <BellIcon width="48" height="48" className="mx-auto mb-2 opacity-50" />
                 <p className="text-sm">No notifications yet</p>
               </div>
             ) : (
@@ -121,7 +97,9 @@ const NotificationBell = () => {
                 {notifications.slice(0, 20).map((notification, index) => (
                   <div
                     key={notification.id || index}
-                    className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer border-l-4 ${getNotificationColor(notification.type)}`}
+                    className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer border-l-4 ${getNotificationColor(
+                      notification.type
+                    )}`}
                   >
                     <div className="flex items-start gap-3">
                       <span className="text-2xl">{getNotificationIcon(notification.type)}</span>
