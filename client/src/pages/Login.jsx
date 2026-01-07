@@ -28,6 +28,7 @@ const Login = () => {
       await login(token);
 
       toast.success('Welcome back!');
+      // PrivateRoute will handle redirection to /complete-profile if needed
       navigate('/');
     } catch (error) {
       const errorMessage = error.response?.data?.error || 'Invalid credentials';

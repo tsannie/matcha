@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router';
 import Login from './Login';
 import Register from './Register';
 import Home from './Home';
+import Search from './Search';
 import VerifyEmail from './VerifyEmail';
 import ForgotPassword from './ForgotPassword';
 import ResetPassword from './ResetPassword';
@@ -27,6 +28,7 @@ const App = () => {
 
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
+            <Route path="/search" element={<Search />} />
             <Route path="/profile" element={<div className="p-10 text-center">Page Profil (A faire)</div>} />
             <Route path="/chat" element={<div className="p-10 text-center">Page Chat (A faire)</div>} />
           </Route>

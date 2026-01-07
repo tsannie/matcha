@@ -1,9 +1,10 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import api from '../api/axios';
 import FilterSidebar from '../components/FilterSidebar';
 import ProfileCard from '../components/ProfileCard';
 import { useAuth } from '../context/AuthContext';
+import Select from '../components/ui/Select';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -11,18 +12,49 @@ const Home = () => {
 
   const [profiles, setProfiles] = useState([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
+  const [sortBy, setSortBy] = useState('smart');
+  const [sortOrder, setSortOrder] = useState('desc');
 
   const [filters, setFilters] = useState({
     age: [18, 50],
     fame: [0, 100],
     distance: 50,
+    tags: [],
     active: {
-      age: true,
-      fame: true,
-      distance: true,
+      age: false,
+      fame: false,
+      distance: false,
       tags: false,
     },
   });
+
+  // Build query params from filters
+  const buildQueryParams = () => {
+    const params = new URLSearchParams();
+
+    params.append('sortBy', sortBy);
+    params.append('order', sortOrder);
+
+    if (filters.active.age) {
+      params.append('minAge', filters.age[0]);
+      params.append('maxAge', filters.age[1]);
+    }
+
+    if (filters.active.fame) {
+      params.append('minFame', filters.fame[0]);
+      params.append('maxFame', filters.fame[1]);
+    }
+
+    if (filters.active.distance) {
+      params.append('maxDistance', filters.distance);
+    }
+
+    if (filters.active.tags && filters.tags.length > 0) {
+      filters.tags.forEach(tag => params.append('tags', tag));
+    }
+
+    return params.toString();
+  };
 
   useEffect(() => {
     if (!authLoading && !user) return;
@@ -30,7 +62,8 @@ const Home = () => {
     const fetchProfiles = async () => {
       try {
         setLoadingProfiles(true);
-        const res = await api.get('/browsing/recommendations');
+        const queryString = buildQueryParams();
+        const res = await api.get(`/browsing/recommendations?${queryString}`);
         setProfiles(res.data);
       } catch (error) {
         console.error(error);
@@ -40,16 +73,7 @@ const Home = () => {
     };
 
     if (user) fetchProfiles();
-  }, [user, authLoading]);
-
-  const filteredProfiles = useMemo(() => {
-    return profiles.filter((p) => {
-      if (filters.active.age && (p.age < filters.age[0] || p.age > filters.age[1])) return false;
-      if (filters.active.fame && (p.fame_rating < filters.fame[0] || p.fame_rating > filters.fame[1])) return false;
-      if (filters.active.distance && (p.distance || 0) > filters.distance) return false;
-      return true;
-    });
-  }, [profiles, filters]);
+  }, [user, authLoading, filters, sortBy, sortOrder]);
 
   if (authLoading) return null;
 
@@ -58,18 +82,48 @@ const Home = () => {
       <FilterSidebar filters={filters} setFilters={setFilters} />
 
       <div className="flex-grow w-full">
-        <div className="mb-6 flex justify-between items-end">
+        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div>
             <h1 className="text-2xl font-bold text-primary1">Discover</h1>
-            <p className="text-gray-500 text-sm">{filteredProfiles.length} profiles found around you</p>
+            <p className="text-gray-500 text-sm">{profiles.length} profiles found</p>
+          </div>
+
+          <div className="flex gap-3 items-center">
+            <Select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="min-w-[160px]"
+            >
+              <option value="smart">Smart Match</option>
+              <option value="age">Age</option>
+              <option value="distance">Distance</option>
+              <option value="fame">Fame Rating</option>
+              <option value="tags">Common Tags</option>
+            </Select>
+
+            <button
+              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              title={`Sort ${sortOrder === 'asc' ? 'Ascending' : 'Descending'}`}
+            >
+              {sortOrder === 'asc' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 5v14M19 12l-7 7-7-7"/>
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 19V5M5 12l7-7 7 7"/>
+                </svg>
+              )}
+            </button>
           </div>
         </div>
 
         {loadingProfiles ? (
           <div className="text-center py-20 animate-pulse text-gray-400">Loading profiles...</div>
-        ) : filteredProfiles.length > 0 ? (
+        ) : profiles.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProfiles.map((profile) => (
+            {profiles.map((profile) => (
               <ProfileCard key={profile.id} user={profile} />
             ))}
           </div>

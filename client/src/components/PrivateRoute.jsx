@@ -1,8 +1,9 @@
-import { Navigate, Outlet } from 'react-router';
-import { useAuth } from '../context/AuthContext';
+import { Navigate, Outlet, useLocation } from 'react-router';
+import { useAuth, checkProfileComplete } from '../context/AuthContext';
 
 const PrivateRoute = () => {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -14,6 +15,11 @@ const PrivateRoute = () => {
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Redirect to complete-profile if profile is incomplete (except if already on that page)
+  if (!checkProfileComplete(user) && location.pathname !== '/complete-profile') {
+    return <Navigate to="/complete-profile" replace />;
   }
 
   return <Outlet />;
