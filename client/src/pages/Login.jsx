@@ -11,10 +11,14 @@ const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({ username: '', password: '' });
+  const [formData, setFormData] = useState({ username: '', password: '', rememberMe: false });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleCheckboxChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.checked });
   };
 
   const handleSubmit = async (e) => {
@@ -52,6 +56,20 @@ const Login = () => {
                 Forgot password?
               </Link>
             </div>
+          </div>
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              name="rememberMe"
+              checked={formData.rememberMe}
+              onChange={handleCheckboxChange}
+              className="w-4 h-4 text-primary1 border-gray-300 rounded focus:ring-primary1"
+            />
+            <label htmlFor="rememberMe" className="ml-2 text-sm text-gray-600">
+              Rester connecté
+            </label>
           </div>
 
           <div className="pt-2">

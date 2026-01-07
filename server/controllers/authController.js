@@ -42,7 +42,7 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, rememberMe } = req.body;
 
   try {
     const userResult = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
@@ -62,7 +62,8 @@ export const login = async (req, res) => {
       return res.status(403).json({ error: 'Please verify your email before logging in.' });
     }
 
-    const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const expiresIn = rememberMe ? '30d' : '1h';
+    const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn });
 
     res.json({ token, user: { id: user.id, username: user.username } });
   } catch (err) {
