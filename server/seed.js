@@ -77,9 +77,9 @@ const seed = async () => {
       let sexual_preference;
       const randPref = Math.random();
 
-      if (randPref < 0.7) sexual_preference = gender === 'male' ? 'female' : 'male';
-      else if (randPref < 0.85) sexual_preference = gender;
-      else sexual_preference = 'both';
+      if (randPref < 0.7) sexual_preference = 'heterosexual';
+      else if (randPref < 0.85) sexual_preference = 'homosexual';
+      else sexual_preference = 'bisexual';
 
       const birthdate = faker.date.birthdate({ min: 18, max: 60, mode: 'age' });
       const biography = faker.lorem.paragraph().substring(0, 200);

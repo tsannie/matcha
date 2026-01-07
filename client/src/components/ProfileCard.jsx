@@ -12,45 +12,47 @@ const ProfileCard = ({ user }) => {
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col p-0 relative group">
-      <div className="relative h-64 w-full bg-gray-200">
+    <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300 h-full flex flex-col p-0 relative group hover:scale-[1.02]">
+      <div className="relative h-80 w-full bg-gray-200">
         <img src={user.profile_picture} alt={user.username} className="w-full h-full object-cover" />
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
-          <h3 className="text-xl font-bold">
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-5 text-white">
+          <h3 className="text-2xl font-bold">
             {user.firstname}, {user.age}
           </h3>
-          <p className="text-sm opacity-90">@{user.username}</p>
+          <p className="text-sm opacity-90 mt-1">@{user.username}</p>
         </div>
       </div>
 
       {/* Contenu */}
-      <div className="p-4 flex-grow flex flex-col gap-3">
+      <div className="p-5 flex-grow flex flex-col gap-3">
         {/* Tags */}
         <div className="flex flex-wrap gap-2">
           {user.tags &&
             user.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-1 bg-primary3/10 text-primary1 text-xs rounded-full font-medium border border-primary3/20"
+                className="px-3 py-1.5 bg-primary3/10 text-primary1 text-xs rounded-full font-medium border border-primary3/20"
               >
                 #{tag}
               </span>
             ))}
         </div>
 
-        <p className="text-gray-600 text-sm line-clamp-2">{user.biography || 'No biography.'}</p>
+        <p className="text-gray-600 text-sm line-clamp-3 leading-relaxed">{user.biography || 'No biography.'}</p>
 
-        <div className="mt-auto pt-3 flex items-center justify-between text-xs text-gray-500 font-mono border-t border-gray-100">
-          <span className="flex items-center gap-1">⭐ {user.fame_rating}</span>
-          <span className="flex items-center gap-1">
-            📍 {user.distance ? `${Math.round(user.distance)} km` : '? km'}
+        <div className="mt-auto pt-4 flex items-center justify-between text-sm text-gray-500 border-t border-gray-100">
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="text-base">⭐</span> {user.fame_rating}
+          </span>
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="text-base">📍</span> {user.distance ? `${Math.round(user.distance)} km` : '? km'}
           </span>
         </div>
 
         <div className="mt-3">
           <Button
             onClick={handleLike}
-            className={`w-full flex items-center justify-center gap-2 transition-colors ${
+            className={`w-full flex items-center justify-center gap-2 transition-all py-3 ${
               liked ? 'bg-pink-100 text-pink-600 border-pink-200 hover:bg-pink-200' : 'bg-primary1 text-white'
             }`}
           >

@@ -125,12 +125,13 @@ export const getRecommendations = async (req, res) => {
     // Tag filter - users must have at least one of the specified tags
     if (filterTags) {
       const tagArray = Array.isArray(filterTags) ? filterTags : [filterTags];
+      const lowerTagArray = tagArray.map(tag => tag.toLowerCase());
       query += ` AND EXISTS (
         SELECT 1 FROM user_tags ut_filter
         JOIN tags t_filter ON ut_filter.tag_id = t_filter.id
-        WHERE ut_filter.user_id = u.id AND t_filter.name = ANY($${paramIndex})
+        WHERE ut_filter.user_id = u.id AND LOWER(t_filter.name) = ANY($${paramIndex})
       )`;
-      queryParams.push(tagArray);
+      queryParams.push(lowerTagArray);
       paramIndex++;
     }
 
@@ -316,12 +317,13 @@ export const searchUsers = async (req, res) => {
     // Tag filter - users must have at least one of the specified tags
     if (filterTags) {
       const tagArray = Array.isArray(filterTags) ? filterTags : [filterTags];
+      const lowerTagArray = tagArray.map(tag => tag.toLowerCase());
       query += ` AND EXISTS (
         SELECT 1 FROM user_tags ut_filter
         JOIN tags t_filter ON ut_filter.tag_id = t_filter.id
-        WHERE ut_filter.user_id = u.id AND t_filter.name = ANY($${paramIndex})
+        WHERE ut_filter.user_id = u.id AND LOWER(t_filter.name) = ANY($${paramIndex})
       )`;
-      queryParams.push(tagArray);
+      queryParams.push(lowerTagArray);
       paramIndex++;
     }
 

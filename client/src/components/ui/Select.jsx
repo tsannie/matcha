@@ -1,6 +1,6 @@
-const Select = ({ label, value, onChange, options = [], name, required, placeholder }) => {
+const Select = ({ label, value, onChange, options = [], name, required, placeholder, className, children }) => {
   return (
-    <div className="w-full">
+    <div className={className}>
       {label && (
         <label className="block text-sm font-medium text-gray-600 mb-1">
           {label}
@@ -19,7 +19,7 @@ const Select = ({ label, value, onChange, options = [], name, required, placehol
             {placeholder}
           </option>
         )}
-        {options.map((opt) => (
+        {children ? children : options.map((opt) => (
           <option key={opt.value} value={opt.value}>
             {opt.label}
           </option>

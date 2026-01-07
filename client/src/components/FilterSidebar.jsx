@@ -46,10 +46,25 @@ const FilterSidebar = ({ filters, setFilters }) => {
   );
 
   return (
-    <div className="w-full md:w-80 p-6 bg-[#1a1a1a] text-white rounded-xl h-fit border border-gray-800 shadow-xl flex-shrink-0">
-      <h2 className="text-xl font-bold mb-6 text-gray-200 border-b border-gray-700 pb-4">Filters</h2>
+    <div className="w-full md:w-80 bg-white rounded-xl shadow-sm border border-gray-200 h-fit flex-shrink-0 overflow-hidden">
+      <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-primary1 to-primary3">
+        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line>
+            <line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg>
+          Filters
+        </h2>
+      </div>
 
-      <div className="space-y-8">
+      <div className="p-6 space-y-6">
         <RangeSlider
           label="Age"
           min={18}
@@ -81,33 +96,35 @@ const FilterSidebar = ({ filters, setFilters }) => {
         />
 
         {/* Tags Filter */}
-        <div>
-          <div className="flex gap-4 items-center mb-3">
+        <div className="border-t border-gray-200 pt-6">
+          <div className="flex gap-3 items-center mb-4">
             <input
               type="checkbox"
               checked={filters.active.tags}
               onChange={() => toggleFilter('tags')}
-              className="w-5 h-5 rounded"
+              className="w-5 h-5 rounded border-gray-300 text-primary1 focus:ring-primary1 cursor-pointer"
             />
-            <span className="block font-medium text-gray-300 text-sm">Interest Tags</span>
+            <label className="font-medium text-gray-700 text-sm cursor-pointer" onClick={() => toggleFilter('tags')}>
+              Interest Tags
+            </label>
           </div>
 
           {filters.active.tags && (
-            <div className="ml-9 space-y-3">
+            <div className="space-y-3 pl-8">
               {/* Selected Tags */}
               {filters.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-3">
                   {filters.tags.map(tag => (
                     <span
                       key={tag}
-                      className="px-2 py-1 bg-primary1/20 text-primary1 text-xs rounded-full flex items-center gap-1"
+                      className="px-3 py-1.5 bg-primary1/10 text-primary1 text-xs rounded-full flex items-center gap-1.5 border border-primary1/20 font-medium"
                     >
                       #{tag}
                       <button
                         onClick={() => removeTag(tag)}
-                        className="hover:text-red-400"
+                        className="hover:text-red-500 transition-colors ml-0.5"
                       >
-                        ×
+                        ✕
                       </button>
                     </span>
                   ))}
@@ -129,20 +146,20 @@ const FilterSidebar = ({ filters, setFilters }) => {
                       addTag(tagInput);
                     }
                   }}
-                  placeholder="Add tag..."
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary1"
+                  placeholder="Type a tag..."
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-primary1 focus:ring-2 focus:ring-primary1/20 transition-all"
                 />
 
                 {/* Tag Suggestions */}
                 {showTagSuggestions && tagInput && filteredSuggestions.length > 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-gray-800 border border-gray-700 rounded max-h-40 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
                     {filteredSuggestions.map(tag => (
                       <button
                         key={tag}
                         onClick={() => addTag(tag)}
-                        className="w-full text-left px-3 py-2 hover:bg-gray-700 text-sm text-gray-300"
+                        className="w-full text-left px-3 py-2.5 hover:bg-primary1/5 text-sm text-gray-700 transition-colors border-b border-gray-100 last:border-b-0"
                       >
-                        #{tag}
+                        <span className="text-primary1 font-medium">#{tag}</span>
                       </button>
                     ))}
                   </div>
