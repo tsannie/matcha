@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import logo from '../assets/logo_matcha.png';
+import NotificationBell from './NotificationBell';
 
 const Layout = () => {
   const { user, logout } = useAuth();
@@ -49,6 +50,16 @@ const Layout = () => {
               >
                 Search
               </Link>
+              <Link
+                to="/likes"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isActive('/likes')
+                    ? 'text-primary1 bg-primary3/10'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                Likes
+              </Link>
             </div>
           </div>
 
@@ -76,25 +87,8 @@ const Layout = () => {
               </svg>
             </Link>
 
-            {/* 2. Notifications (Placeholder pour le moment) */}
-            <button className="relative p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
-                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
-              </svg>
-              {/* Badge rouge exemple */}
-              <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full border border-white"></span>
-            </button>
+            {/* 2. Notifications */}
+            <NotificationBell />
 
             {/* 3. Profile Dropdown */}
             <div className="relative">

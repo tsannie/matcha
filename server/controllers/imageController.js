@@ -30,6 +30,23 @@ export const uploadPhoto = async (req, res) => {
       [userId, filePath, isProfilePic]
     );
 
+    // Check if profile is now complete and update flag
+    const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+    const user = userResult.rows[0];
+    const hasTags = await pool.query('SELECT user_id FROM user_tags WHERE user_id = $1 LIMIT 1', [userId]);
+
+    const isComplete =
+      user.gender &&
+      user.sexual_preference &&
+      user.biography &&
+      user.latitude !== null &&
+      user.longitude !== null &&
+      hasTags.rows.length > 0;
+
+    if (isComplete && !user.profile_complete) {
+      await pool.query('UPDATE users SET profile_complete = true WHERE id = $1', [userId]);
+    }
+
     res.status(201).json(newImage.rows[0]);
   } catch (err) {
     console.error(err);

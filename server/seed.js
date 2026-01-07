@@ -52,7 +52,7 @@ const seed = async () => {
     console.log('🌱 Starting seed...');
     console.log(`Connecting to database: ${process.env.DB_NAME} as ${process.env.DB_USER}`);
 
-    await pool.query('TRUNCATE user_images, user_tags, tags, users RESTART IDENTITY CASCADE');
+    await pool.query('TRUNCATE notifications, blocks, reports, profile_views, likes, user_images, user_tags, tags, users RESTART IDENTITY CASCADE');
 
     const tagIds = [];
     for (const tagName of TAGS_LIST) {
@@ -137,7 +137,111 @@ const seed = async () => {
       process.stdout.write('.');
     }
 
-    console.log(`\n✅ Seed terminé avec succès ! ${USERS_TO_CREATE} utilisateurs créés.`);
+    console.log('\n📊 Creating likes and interactions...');
+
+    // Get all user IDs
+    const allUsersResult = await pool.query('SELECT id FROM users ORDER BY id');
+    const userIds = allUsersResult.rows.map((row) => row.id);
+
+    // Generate random likes (about 30% of possible combinations)
+    const likesToCreate = Math.floor((userIds.length * userIds.length * 0.3) / 2);
+    const createdLikes = new Set();
+
+    for (let i = 0; i < likesToCreate; i++) {
+      const likerId = userIds[Math.floor(Math.random() * userIds.length)];
+      const likedId = userIds[Math.floor(Math.random() * userIds.length)];
+
+      // Avoid self-likes and duplicates
+      if (likerId !== likedId && !createdLikes.has(`${likerId}-${likedId}`)) {
+        try {
+          await pool.query('INSERT INTO likes (liker_id, liked_id) VALUES ($1, $2)', [likerId, likedId]);
+          createdLikes.add(`${likerId}-${likedId}`);
+        } catch (err) {
+          // Ignore duplicate errors
+        }
+      }
+    }
+
+    // Create some mutual matches (about 10% of users)
+    const matchesToCreate = Math.floor(userIds.length * 0.1);
+    for (let i = 0; i < matchesToCreate; i++) {
+      const user1 = userIds[Math.floor(Math.random() * userIds.length)];
+      const user2 = userIds[Math.floor(Math.random() * userIds.length)];
+
+      if (user1 !== user2) {
+        try {
+          await pool.query('INSERT INTO likes (liker_id, liked_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [
+            user1,
+            user2,
+          ]);
+          await pool.query('INSERT INTO likes (liker_id, liked_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [
+            user2,
+            user1,
+          ]);
+        } catch (err) {
+          // Ignore errors
+        }
+      }
+    }
+
+    console.log(`✅ Created ${createdLikes.size} likes and ~${matchesToCreate} mutual matches`);
+
+    // Generate random profile views (about 40% of possible combinations)
+    const viewsToCreate = Math.floor((userIds.length * userIds.length * 0.4) / 2);
+    const createdViews = new Set();
+
+    for (let i = 0; i < viewsToCreate; i++) {
+      const viewerId = userIds[Math.floor(Math.random() * userIds.length)];
+      const viewedId = userIds[Math.floor(Math.random() * userIds.length)];
+
+      if (viewerId !== viewedId && !createdViews.has(`${viewerId}-${viewedId}`)) {
+        try {
+          await pool.query('INSERT INTO profile_views (viewer_id, viewed_id) VALUES ($1, $2)', [viewerId, viewedId]);
+          createdViews.add(`${viewerId}-${viewedId}`);
+        } catch (err) {
+          // Ignore duplicate errors
+        }
+      }
+    }
+
+    console.log(`✅ Created ${createdViews.size} profile views`);
+
+    // Generate a few random blocks (about 2% of users)
+    const blocksToCreate = Math.floor(userIds.length * 0.02);
+    for (let i = 0; i < blocksToCreate; i++) {
+      const blockerId = userIds[Math.floor(Math.random() * userIds.length)];
+      const blockedId = userIds[Math.floor(Math.random() * userIds.length)];
+
+      if (blockerId !== blockedId) {
+        try {
+          await pool.query('INSERT INTO blocks (blocker_id, blocked_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [
+            blockerId,
+            blockedId,
+          ]);
+        } catch (err) {
+          // Ignore errors
+        }
+      }
+    }
+
+    console.log(`✅ Created ${blocksToCreate} blocks`);
+
+    // Update fame ratings based on likes and views
+    console.log('📈 Updating fame ratings...');
+    await pool.query(`
+      UPDATE users
+      SET fame_rating = (
+        SELECT COALESCE(
+          (SELECT COUNT(*) * 5 FROM likes WHERE liked_id = users.id) +
+          (SELECT COUNT(*) FROM profile_views WHERE viewed_id = users.id) +
+          (SELECT COUNT(*) * 2 FROM user_images WHERE user_id = users.id) +
+          CASE WHEN profile_complete THEN 10 ELSE 0 END,
+          0
+        )
+      )
+    `);
+
+    console.log(`\n✅ Seed terminé avec succès ! ${USERS_TO_CREATE} utilisateurs créés avec interactions.`);
     process.exit(0);
   } catch (err) {
     console.error('\n❌ Erreur pendant le seed:', err);

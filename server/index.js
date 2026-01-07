@@ -1,13 +1,19 @@
 import express from 'express';
+import { createServer } from 'http';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { runDatabaseMigration } from './utils/dbInit.js';
+import { initializeSocket } from './socket.js';
 
 import authRoutes from './routes/authRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 import browsingRoutes from './routes/browsingRoutes.js';
+import likeRoutes from './routes/likeRoutes.js';
+import viewRoutes from './routes/viewRoutes.js';
+import blockRoutes from './routes/blockRoutes.js';
+import reportRoutes from './routes/reportRoutes.js';
 
 dotenv.config();
 
@@ -25,9 +31,17 @@ app.use(express.json());
 app.use('/api/browsing', browsingRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/likes', likeRoutes);
+app.use('/api/views', viewRoutes);
+app.use('/api/blocks', blockRoutes);
+app.use('/api/reports', reportRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-app.listen(port, async () => {
+// Create HTTP server and initialize Socket.io
+const server = createServer(app);
+initializeSocket(server);
+
+server.listen(port, async () => {
   await runDatabaseMigration();
 
   console.log(`🚀 Server running on port ${port}`);

@@ -47,6 +47,13 @@ export const getRecommendations = async (req, res) => {
     const queryParams = [userId];
     let paramIndex = 2;
 
+    // Filter out blocked users (both directions)
+    conditions.push(`NOT EXISTS(
+      SELECT 1 FROM blocks
+      WHERE (blocker_id = $1 AND blocked_id = u.id)
+         OR (blocker_id = u.id AND blocked_id = $1)
+    )`);
+
     // Sexual preference filtering
     const userPreference = currentUser.sexual_preference || 'bisexual';
     const userGender = currentUser.gender;
@@ -114,7 +121,14 @@ export const getRecommendations = async (req, res) => {
           WHERE ut2.tag_id IN (
             SELECT tag_id FROM user_tags WHERE user_id = $1
           )
-        ) as common_tags_count
+        ) as common_tags_count,
+        EXISTS(SELECT 1 FROM likes WHERE liker_id = $1 AND liked_id = u.id) as liked_by_me,
+        EXISTS(SELECT 1 FROM likes WHERE liker_id = u.id AND liked_id = $1) as liked_by_them,
+        EXISTS(
+          SELECT 1 FROM likes l1
+          WHERE l1.liker_id = $1 AND l1.liked_id = u.id
+          AND EXISTS(SELECT 1 FROM likes l2 WHERE l2.liker_id = u.id AND l2.liked_id = $1)
+        ) as is_match
       FROM users u
       LEFT JOIN user_tags ut ON u.id = ut.user_id
       LEFT JOIN tags t ON ut.tag_id = t.id
@@ -243,6 +257,13 @@ export const searchUsers = async (req, res) => {
     const queryParams = [userId];
     let paramIndex = 2;
 
+    // Filter out blocked users (both directions)
+    conditions.push(`NOT EXISTS(
+      SELECT 1 FROM blocks
+      WHERE (blocker_id = $1 AND blocked_id = u.id)
+         OR (blocker_id = u.id AND blocked_id = $1)
+    )`);
+
     // Gender filter
     if (gender) {
       conditions.push(`u.gender = $${paramIndex}`);
@@ -306,7 +327,14 @@ export const searchUsers = async (req, res) => {
           WHERE ut2.tag_id IN (
             SELECT tag_id FROM user_tags WHERE user_id = $1
           )
-        ) as common_tags_count
+        ) as common_tags_count,
+        EXISTS(SELECT 1 FROM likes WHERE liker_id = $1 AND liked_id = u.id) as liked_by_me,
+        EXISTS(SELECT 1 FROM likes WHERE liker_id = u.id AND liked_id = $1) as liked_by_them,
+        EXISTS(
+          SELECT 1 FROM likes l1
+          WHERE l1.liker_id = $1 AND l1.liked_id = u.id
+          AND EXISTS(SELECT 1 FROM likes l2 WHERE l2.liker_id = u.id AND l2.liked_id = $1)
+        ) as is_match
       FROM users u
       LEFT JOIN user_tags ut ON u.id = ut.user_id
       LEFT JOIN tags t ON ut.tag_id = t.id

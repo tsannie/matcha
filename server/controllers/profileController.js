@@ -69,7 +69,26 @@ export const updateProfile = async (req, res) => {
 
     const result = await pool.query(query, [gender, sexual_preference, birthdate, biography, latitude, longitude, userId]);
 
-    res.json({ message: 'Profile updated', user: result.rows[0] });
+    // Check if profile is now complete and update flag
+    const user = result.rows[0];
+    const hasImages = await pool.query('SELECT id FROM user_images WHERE user_id = $1 LIMIT 1', [userId]);
+    const hasTags = await pool.query('SELECT user_id FROM user_tags WHERE user_id = $1 LIMIT 1', [userId]);
+
+    const isComplete =
+      user.gender &&
+      user.sexual_preference &&
+      user.biography &&
+      user.latitude !== null &&
+      user.longitude !== null &&
+      hasImages.rows.length > 0 &&
+      hasTags.rows.length > 0;
+
+    if (isComplete && !user.profile_complete) {
+      await pool.query('UPDATE users SET profile_complete = true WHERE id = $1', [userId]);
+      user.profile_complete = true;
+    }
+
+    res.json({ message: 'Profile updated', user });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: 'Server error' });
@@ -121,6 +140,24 @@ export const updateProfileTags = async (req, res) => {
       ]);
     }
 
+    // Check if profile is now complete and update flag
+    const userResult = await client.query('SELECT * FROM users WHERE id = $1', [userId]);
+    const user = userResult.rows[0];
+    const hasImages = await client.query('SELECT id FROM user_images WHERE user_id = $1 LIMIT 1', [userId]);
+
+    const isComplete =
+      user.gender &&
+      user.sexual_preference &&
+      user.biography &&
+      user.latitude !== null &&
+      user.longitude !== null &&
+      hasImages.rows.length > 0 &&
+      tags.length > 0;
+
+    if (isComplete && !user.profile_complete) {
+      await client.query('UPDATE users SET profile_complete = true WHERE id = $1', [userId]);
+    }
+
     await client.query('COMMIT'); // On valide tout
     res.json({ message: 'Tags updated successfully', tags });
   } catch (err) {
@@ -129,5 +166,69 @@ export const updateProfileTags = async (req, res) => {
     res.status(500).json({ error: 'Server error updating tags' });
   } finally {
     client.release(); // On libère la connexion
+  }
+};
+
+export const getUserProfile = async (req, res) => {
+  const currentUserId = req.user.id;
+  const targetUserId = parseInt(req.params.userId);
+
+  if (isNaN(targetUserId)) {
+    return res.status(400).json({ error: 'Invalid user ID' });
+  }
+
+  try {
+    // Check if users have blocked each other
+    const blockCheck = await pool.query(
+      `SELECT id FROM blocks
+       WHERE (blocker_id = $1 AND blocked_id = $2)
+          OR (blocker_id = $2 AND blocked_id = $1)`,
+      [currentUserId, targetUserId]
+    );
+
+    if (blockCheck.rows.length > 0) {
+      return res.status(403).json({ error: 'Cannot view this profile' });
+    }
+
+    // Get user profile with like status
+    const userResult = await pool.query(
+      `SELECT
+        u.id, u.username, u.firstname, u.lastname, u.gender,
+        u.sexual_preference, u.birthdate, u.biography, u.fame_rating,
+        u.is_online, u.last_seen,
+        EXISTS(SELECT 1 FROM likes WHERE liker_id = $1 AND liked_id = u.id) as liked_by_me,
+        EXISTS(SELECT 1 FROM likes WHERE liker_id = u.id AND liked_id = $1) as liked_by_them,
+        EXISTS(
+          SELECT 1 FROM likes l1
+          WHERE l1.liker_id = $1 AND l1.liked_id = u.id
+          AND EXISTS(SELECT 1 FROM likes l2 WHERE l2.liker_id = u.id AND l2.liked_id = $1)
+        ) as is_match
+       FROM users u
+       WHERE u.id = $2 AND u.profile_complete = true`,
+      [currentUserId, targetUserId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const user = userResult.rows[0];
+
+    // Get profile picture
+    const profilePicResult = await pool.query(
+      'SELECT file_path FROM user_images WHERE user_id = $1 AND is_profile_picture = true LIMIT 1',
+      [targetUserId]
+    );
+
+    const userProfile = {
+      ...user,
+      profile_picture: profilePicResult.rows[0]?.file_path || null,
+      tags: await getTagsFromUserId(targetUserId),
+    };
+
+    res.json(userProfile);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Server error' });
   }
 };

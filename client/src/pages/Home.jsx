@@ -56,22 +56,21 @@ const Home = () => {
     return params.toString();
   };
 
+  const fetchProfiles = async () => {
+    try {
+      setLoadingProfiles(true);
+      const queryString = buildQueryParams();
+      const res = await api.get(`/browsing/recommendations?${queryString}`);
+      setProfiles(res.data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingProfiles(false);
+    }
+  };
+
   useEffect(() => {
     if (!authLoading && !user) return;
-
-    const fetchProfiles = async () => {
-      try {
-        setLoadingProfiles(true);
-        const queryString = buildQueryParams();
-        const res = await api.get(`/browsing/recommendations?${queryString}`);
-        setProfiles(res.data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoadingProfiles(false);
-      }
-    };
-
     if (user) fetchProfiles();
   }, [user, authLoading, filters, sortBy, sortOrder]);
 
@@ -124,7 +123,7 @@ const Home = () => {
         ) : profiles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {profiles.map((profile) => (
-              <ProfileCard key={profile.id} user={profile} />
+              <ProfileCard key={profile.id} user={profile} onLikeChange={fetchProfiles} />
             ))}
           </div>
         ) : (

@@ -24,7 +24,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+    // Only disconnect on 401 (Unauthorized), not 403 (Forbidden)
+    // 403 means authenticated but not allowed for this specific resource
+    if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
       // Évite la boucle infinie de redirection si on est déjà sur login/register
       if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
