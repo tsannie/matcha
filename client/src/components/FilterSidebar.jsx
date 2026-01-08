@@ -1,10 +1,23 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import RangeSlider from './ui/RangeSlider';
 
 const COMMON_TAGS = [
-  'vegan', 'geek', 'piercing', 'travel', 'sports', 'music',
-  'art', 'cooking', 'gaming', 'reading', 'hiking', 'yoga',
-  'photography', 'movies', 'dance', 'fitness'
+  'vegan',
+  'geek',
+  'piercing',
+  'travel',
+  'sports',
+  'music',
+  'art',
+  'cooking',
+  'gaming',
+  'reading',
+  'hiking',
+  'yoga',
+  'photography',
+  'movies',
+  'dance',
+  'fitness',
 ];
 
 const FilterSidebar = ({ filters, setFilters }) => {
@@ -36,131 +49,201 @@ const FilterSidebar = ({ filters, setFilters }) => {
   const removeTag = (tagToRemove) => {
     setFilters((prev) => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove),
+      tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
 
-  const filteredSuggestions = COMMON_TAGS.filter(tag =>
-    tag.toLowerCase().includes(tagInput.toLowerCase()) &&
-    !filters.tags.includes(tag)
+  const filteredSuggestions = COMMON_TAGS.filter(
+    (tag) => tag.toLowerCase().includes(tagInput.toLowerCase()) && !filters.tags.includes(tag)
   );
 
+  const activeFiltersCount = Object.values(filters.active).filter(Boolean).length;
+
+  useEffect(() => {
+    if (!filters.active.tags) {
+      setFilters((prev) => ({ ...prev, tags: [] }));
+    }
+  }, [filters.active.tags, setFilters]);
+
   return (
-    <div className="w-full md:w-80 bg-white rounded-xl shadow-sm border border-gray-200 h-fit flex-shrink-0 overflow-hidden">
-      <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-primary1 to-primary3">
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="4" y1="21" x2="4" y2="14"></line>
-            <line x1="4" y1="10" x2="4" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12" y2="3"></line>
-            <line x1="20" y1="21" x2="20" y2="16"></line>
-            <line x1="20" y1="12" x2="20" y2="3"></line>
-            <line x1="1" y1="14" x2="7" y2="14"></line>
-            <line x1="9" y1="8" x2="15" y2="8"></line>
-            <line x1="17" y1="16" x2="23" y2="16"></line>
-          </svg>
-          Filters
-        </h2>
+    <div className="w-full md:w-80 bg-white rounded-2xl shadow-lg border border-gray-100 h-fit flex-shrink-0 overflow-hidden transition-all duration-300 hover:shadow-xl">
+      {/* Header */}
+      <div className="p-6 bg-primary1 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20"></div>
+
+        <div className="relative flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-white/20 backdrop-blur-sm p-2 rounded-lg">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="4" y1="21" x2="4" y2="14"></line>
+                <line x1="4" y1="10" x2="4" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12" y2="3"></line>
+                <line x1="20" y1="21" x2="20" y2="16"></line>
+                <line x1="20" y1="12" x2="20" y2="3"></line>
+                <line x1="1" y1="14" x2="7" y2="14"></line>
+                <line x1="9" y1="8" x2="15" y2="8"></line>
+                <line x1="17" y1="16" x2="23" y2="16"></line>
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-white">Filters</h2>
+          </div>
+
+          {activeFiltersCount > 0 && (
+            <div className="bg-white text-primary1 text-xs font-bold px-2.5 py-1 rounded-full">
+              {activeFiltersCount}
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="p-6 space-y-6">
-        <RangeSlider
-          label="Age"
-          min={18}
-          max={99}
-          value={filters.age}
-          onChange={(val) => handleRangeChange('age', val)}
-          enabled={filters.active.age}
-          onToggle={() => toggleFilter('age')}
-        />
+      {/* Filters Content */}
+      <div className="p-6 space-y-5">
+        {/* Age Filter */}
+        <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-primary1/30 transition-colors">
+          <RangeSlider
+            label="Age Range"
+            min={18}
+            max={99}
+            value={filters.age}
+            onChange={(val) => handleRangeChange('age', val)}
+            enabled={filters.active.age}
+            onToggle={() => toggleFilter('age')}
+          />
+        </div>
 
-        <RangeSlider
-          label="Fame Rating"
-          min={0}
-          max={1000}
-          value={filters.fame}
-          onChange={(val) => handleRangeChange('fame', val)}
-          enabled={filters.active.fame}
-          onToggle={() => toggleFilter('fame')}
-        />
+        {/* Fame Filter */}
+        <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-primary1/30 transition-colors">
+          <RangeSlider
+            label="Fame Rating"
+            min={0}
+            max={1000}
+            value={filters.fame}
+            onChange={(val) => handleRangeChange('fame', val)}
+            enabled={filters.active.fame}
+            onToggle={() => toggleFilter('fame')}
+          />
+        </div>
 
-        <RangeSlider
-          label="Distance (Km)"
-          min={0}
-          max={500}
-          value={[0, filters.distance]}
-          onChange={(val) => setFilters((prev) => ({ ...prev, distance: val[1] }))}
-          enabled={filters.active.distance}
-          onToggle={() => toggleFilter('distance')}
-        />
+        {/* Distance Filter */}
+        <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-primary1/30 transition-colors">
+          <RangeSlider
+            label="Distance (km)"
+            min={0}
+            max={500}
+            value={[0, filters.distance]}
+            onChange={(val) => setFilters((prev) => ({ ...prev, distance: val[1] }))}
+            enabled={filters.active.distance}
+            onToggle={() => toggleFilter('distance')}
+          />
+        </div>
 
         {/* Tags Filter */}
-        <div className="border-t border-gray-200 pt-6">
+        <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-100 hover:border-primary1/30 transition-colors">
           <div className="flex gap-3 items-center mb-4">
             <input
               type="checkbox"
               checked={filters.active.tags}
               onChange={() => toggleFilter('tags')}
-              className="w-5 h-5 rounded border-gray-300 text-primary1 focus:ring-primary1 cursor-pointer"
+              className="w-5 h-5 rounded border-gray-300 text-primary1 focus:ring-primary1 cursor-pointer transition-all"
             />
-            <label className="font-medium text-gray-700 text-sm cursor-pointer" onClick={() => toggleFilter('tags')}>
+            <label
+              className="font-medium text-gray-700 text-sm cursor-pointer select-none flex-grow"
+              onClick={() => toggleFilter('tags')}
+            >
               Interest Tags
             </label>
+            {filters.tags.length > 0 && (
+              <span className="bg-primary1/10 text-primary1 text-xs font-bold px-2 py-1 rounded-full">
+                {filters.tags.length}
+              </span>
+            )}
           </div>
 
           {filters.active.tags && (
-            <div className="space-y-3 pl-8">
-              {/* Selected Tags */}
-              {filters.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {filters.tags.map(tag => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1.5 bg-primary1/10 text-primary1 text-xs rounded-full flex items-center gap-1.5 border border-primary1/20 font-medium"
-                    >
-                      #{tag}
-                      <button
-                        onClick={() => removeTag(tag)}
-                        className="hover:text-red-500 transition-colors ml-0.5"
-                      >
-                        ✕
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
-
+            <div className="space-y-3 pl-8 animate-fadeIn">
               {/* Tag Input */}
               <div className="relative">
-                <input
-                  type="text"
-                  value={tagInput}
-                  onChange={(e) => {
-                    setTagInput(e.target.value);
-                    setShowTagSuggestions(true);
-                  }}
-                  onFocus={() => setShowTagSuggestions(true)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && tagInput) {
-                      addTag(tagInput);
-                    }
-                  }}
-                  placeholder="Type a tag..."
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-primary1 focus:ring-2 focus:ring-primary1/20 transition-all"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={tagInput}
+                    onChange={(e) => {
+                      setTagInput(e.target.value);
+                      setShowTagSuggestions(true);
+                    }}
+                    onFocus={() => setShowTagSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowTagSuggestions(false), 200)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && tagInput) {
+                        addTag(tagInput);
+                      }
+                    }}
+                    placeholder="Add a tag..."
+                    className="w-full pl-4 pr-10 py-2.5 bg-white border-2 border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-primary1 focus:ring-2 focus:ring-primary1/20 transition-all"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                      <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                    </svg>
+                  </div>
+                </div>
 
                 {/* Tag Suggestions */}
                 {showTagSuggestions && tagInput && filteredSuggestions.length > 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                    {filteredSuggestions.map(tag => (
+                  <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-48 overflow-y-auto animate-fadeIn">
+                    {filteredSuggestions.map((tag) => (
                       <button
                         key={tag}
                         onClick={() => addTag(tag)}
-                        className="w-full text-left px-3 py-2.5 hover:bg-primary1/5 text-sm text-gray-700 transition-colors border-b border-gray-100 last:border-b-0"
+                        className="w-full text-left px-4 py-3 hover:bg-gradient-to-r hover:from-primary1/5 hover:to-primary3/5 text-sm text-gray-700 transition-all border-b border-gray-50 last:border-b-0 flex items-center gap-2 group"
                       >
-                        <span className="text-primary1 font-medium">#{tag}</span>
+                        <span className="text-primary1 font-semibold group-hover:scale-110 transition-transform">
+                          #{tag}
+                        </span>
                       </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Selected Tags */}
+                {filters.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3 p-3 bg-white rounded-lg border border-primary1/10">
+                    {filters.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="group px-3 py-1.5 bg-gradient-to-r from-primary1/10 to-primary3/10 text-primary1 text-xs rounded-full flex items-center gap-1.5 border border-primary1/20 font-medium hover:border-primary1/40 transition-all"
+                      >
+                        #{tag}
+                        <button
+                          onClick={() => removeTag(tag)}
+                          className="hover:bg-red-500 hover:text-white rounded-full w-4 h-4 flex items-center justify-center transition-all text-xs"
+                          aria-label={`Remove ${tag}`}
+                        >
+                          ✕
+                        </button>
+                      </span>
                     ))}
                   </div>
                 )}

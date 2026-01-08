@@ -3,50 +3,61 @@ import 'rc-slider/assets/index.css';
 
 const RangeSlider = ({ label, min, max, value, onChange, enabled, onToggle }) => {
   return (
-    <div className={`flex gap-4 items-start ${!enabled ? 'opacity-50' : ''}`}>
-      <div className="pt-1">
+    <div className={`transition-all duration-200`}>
+      <div className="flex gap-3 items-center">
         <input
           type="checkbox"
           checked={enabled}
           onChange={onToggle}
-          className="w-5 h-5 accent-primary1 rounded cursor-pointer"
+          className="w-5 h-5 rounded border-gray-300 text-primary1 focus:ring-primary1 cursor-pointer transition-all"
         />
+        <label className="font-medium text-gray-700 text-sm cursor-pointer select-none" onClick={onToggle}>
+          {label}
+        </label>
       </div>
 
-      <div className="flex-grow space-y-2">
-        <span className="block font-medium text-gray-300 text-sm">{label}</span>
+      {enabled && (
+        <div className="space-y-3 animate-fadeIn mt-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 min-w-[60px]">
+              <span className="text-xs text-gray-500 font-medium">Min:</span>
+              <span className="text-sm font-semibold text-primary1 bg-primary1/5 px-2 py-1 rounded-md">{value[0]}</span>
+            </div>
 
-        <div className="flex items-center gap-4">
-          <span className="text-white font-mono text-sm border-b border-gray-600 pb-1 min-w-[30px] text-center">
-            {value[0]}
-          </span>
+            <div className="flex-grow px-2 py-1">
+              <Slider
+                range
+                min={min}
+                max={max}
+                value={value}
+                onChange={onChange}
+                styles={{
+                  track: {
+                    backgroundColor: '#00a699',
+                    height: 6,
+                  },
+                  handle: {
+                    borderColor: '#00a699',
+                    backgroundColor: '#fff',
+                    opacity: 1,
+                    boxShadow: '0 2px 8px rgba(233, 64, 87, 0.3)',
+                    width: 18,
+                    height: 18,
+                  },
+                  rail: {
+                    backgroundColor: '#e5e7eb',
+                  },
+                }}
+              />
+            </div>
 
-          <div className="flex-grow pt-1">
-            <Slider
-              range
-              min={min}
-              max={max}
-              value={value}
-              onChange={enabled ? onChange : undefined}
-              disabled={!enabled}
-              styles={{
-                track: { backgroundColor: enabled ? '#E94057' : '#555' },
-                handle: {
-                  borderColor: enabled ? '#E94057' : '#555',
-                  backgroundColor: '#1a1a1a',
-                  opacity: 1,
-                },
-                rail: { backgroundColor: '#4b5563' },
-              }}
-              // ------------------------
-            />
+            <div className="flex items-center gap-2 min-w-[60px]">
+              <span className="text-xs text-gray-500 font-medium">Max:</span>
+              <span className="text-sm font-semibold text-primary1 bg-primary1/5 px-2 py-1 rounded-md">{value[1]}</span>
+            </div>
           </div>
-
-          <span className="text-white font-mono text-sm border-b border-gray-600 pb-1 min-w-[30px] text-center">
-            {value[1]}
-          </span>
         </div>
-      </div>
+      )}
     </div>
   );
 };

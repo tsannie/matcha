@@ -9,6 +9,7 @@ import ResetPassword from './ResetPassword';
 import CompleteProfile from './CompleteProfile';
 import UserProfile from './UserProfile';
 import MyLikes from './MyLikes';
+import EditProfile from './EditProfile';
 import Layout from '../components/Layout';
 import PrivateRoute from '../components/PrivateRoute';
 
@@ -31,7 +32,7 @@ const App = () => {
             <Route path="/search" element={<Search />} />
             <Route path="/user/:userId" element={<UserProfile />} />
             <Route path="/likes" element={<MyLikes />} />
-            <Route path="/profile" element={<div className="p-10 text-center">Page Profil (A faire)</div>} />
+            <Route path="/profile" element={<EditProfile />} />
             <Route path="/chat" element={<div className="p-10 text-center">Page Chat (A faire)</div>} />
           </Route>
         </Route>
