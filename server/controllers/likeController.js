@@ -1,6 +1,7 @@
 import pool from '../config/db.js';
 import { updateFameRating } from '../utils/fameRating.js';
-import { emitNotification } from '../socket.js';
+import { emitNotification, emitToUser } from '../socket.js';
+import { calculateDistance } from '../utils/distance.js';
 
 // Like a user
 export const likeUser = async (req, res) => {
@@ -134,12 +135,22 @@ export const unlikeUser = async (req, res) => {
       return res.status(404).json({ error: 'Like not found' });
     }
 
-    // If they were connected, notify the other user
+    // If they were connected, notify the other user and delete chat history
     if (wasConnected.rows.length > 0) {
       const currentUser = await pool.query(
         'SELECT username FROM users WHERE id = $1',
         [userId]
       );
+
+      // Delete all messages between the two users
+      await pool.query(
+        'DELETE FROM messages WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1)',
+        [userId, targetUserId]
+      );
+
+      // Emit chat-deleted event to both users to clear their cache
+      emitToUser(userId, 'chat-deleted', { userId: targetUserId });
+      emitToUser(targetUserId, 'chat-deleted', { userId });
 
       await pool.query(
         'INSERT INTO notifications (user_id, type, from_user_id, message) VALUES ($1, $2, $3, $4)',
@@ -173,6 +184,18 @@ export const getLikesReceived = async (req, res) => {
   const userId = req.user.id;
 
   try {
+    // Get current user coordinates for distance calculation
+    const currentUserResult = await pool.query(
+      'SELECT latitude, longitude FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (currentUserResult.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const currentUser = currentUserResult.rows[0];
+
     const result = await pool.query(
       `SELECT
         u.id,
@@ -183,6 +206,8 @@ export const getLikesReceived = async (req, res) => {
         u.gender,
         u.biography,
         u.fame_rating,
+        u.latitude,
+        u.longitude,
         EXTRACT(YEAR FROM AGE(u.birthdate)) as age,
         COALESCE(
           (SELECT file_path FROM user_images WHERE user_id = u.id AND is_profile_picture = true LIMIT 1),
@@ -215,7 +240,21 @@ export const getLikesReceived = async (req, res) => {
       [userId]
     );
 
-    res.json(result.rows);
+    // Calculate distance for each user
+    const users = result.rows.map(user => {
+      let distance = null;
+      if (currentUser.latitude && currentUser.longitude && user.latitude && user.longitude) {
+        distance = calculateDistance(
+          currentUser.latitude,
+          currentUser.longitude,
+          user.latitude,
+          user.longitude
+        );
+      }
+      return { ...user, distance };
+    });
+
+    res.json(users);
   } catch (err) {
     console.error('Error getting likes received:', err);
     res.status(500).json({ error: 'Server error' });
@@ -227,6 +266,18 @@ export const getLikesSent = async (req, res) => {
   const userId = req.user.id;
 
   try {
+    // Get current user coordinates for distance calculation
+    const currentUserResult = await pool.query(
+      'SELECT latitude, longitude FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (currentUserResult.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const currentUser = currentUserResult.rows[0];
+
     const result = await pool.query(
       `SELECT
         u.id,
@@ -237,6 +288,8 @@ export const getLikesSent = async (req, res) => {
         u.gender,
         u.biography,
         u.fame_rating,
+        u.latitude,
+        u.longitude,
         EXTRACT(YEAR FROM AGE(u.birthdate)) as age,
         COALESCE(
           (SELECT file_path FROM user_images WHERE user_id = u.id AND is_profile_picture = true LIMIT 1),
@@ -261,12 +314,30 @@ export const getLikesSent = async (req, res) => {
         WHERE (blocker_id = $1 AND blocked_id = u.id)
            OR (blocker_id = u.id AND blocked_id = $1)
       )
+      AND NOT EXISTS(
+        SELECT 1 FROM likes
+        WHERE liker_id = u.id AND liked_id = $1
+      )
       GROUP BY u.id, l.created_at
       ORDER BY l.created_at DESC`,
       [userId]
     );
 
-    res.json(result.rows);
+    // Calculate distance for each user
+    const users = result.rows.map(user => {
+      let distance = null;
+      if (currentUser.latitude && currentUser.longitude && user.latitude && user.longitude) {
+        distance = calculateDistance(
+          currentUser.latitude,
+          currentUser.longitude,
+          user.latitude,
+          user.longitude
+        );
+      }
+      return { ...user, distance };
+    });
+
+    res.json(users);
   } catch (err) {
     console.error('Error getting likes sent:', err);
     res.status(500).json({ error: 'Server error' });
@@ -278,6 +349,18 @@ export const getMatches = async (req, res) => {
   const userId = req.user.id;
 
   try {
+    // Get current user coordinates for distance calculation
+    const currentUserResult = await pool.query(
+      'SELECT latitude, longitude FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (currentUserResult.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const currentUser = currentUserResult.rows[0];
+
     const result = await pool.query(
       `SELECT
         u.id,
@@ -290,6 +373,8 @@ export const getMatches = async (req, res) => {
         u.fame_rating,
         u.is_online,
         u.last_seen,
+        u.latitude,
+        u.longitude,
         EXTRACT(YEAR FROM AGE(u.birthdate)) as age,
         COALESCE(
           (SELECT file_path FROM user_images WHERE user_id = u.id AND is_profile_picture = true LIMIT 1),
@@ -315,7 +400,21 @@ export const getMatches = async (req, res) => {
       [userId]
     );
 
-    res.json(result.rows);
+    // Calculate distance for each user
+    const users = result.rows.map(user => {
+      let distance = null;
+      if (currentUser.latitude && currentUser.longitude && user.latitude && user.longitude) {
+        distance = calculateDistance(
+          currentUser.latitude,
+          currentUser.longitude,
+          user.latitude,
+          user.longitude
+        );
+      }
+      return { ...user, distance };
+    });
+
+    res.json(users);
   } catch (err) {
     console.error('Error getting matches:', err);
     res.status(500).json({ error: 'Server error' });

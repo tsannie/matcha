@@ -1,6 +1,7 @@
 import pool from '../config/db.js';
 import { updateFameRating } from '../utils/fameRating.js';
 import { emitNotification } from '../socket.js';
+import { calculateDistance } from '../utils/distance.js';
 
 // Record a profile view
 export const recordProfileView = async (req, res) => {
@@ -72,6 +73,18 @@ export const getProfileViews = async (req, res) => {
   const userId = req.user.id;
 
   try {
+    // Get current user coordinates for distance calculation
+    const currentUserResult = await pool.query(
+      'SELECT latitude, longitude FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (currentUserResult.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const currentUser = currentUserResult.rows[0];
+
     const result = await pool.query(
       `SELECT
         u.id,
@@ -82,6 +95,8 @@ export const getProfileViews = async (req, res) => {
         u.gender,
         u.biography,
         u.fame_rating,
+        u.latitude,
+        u.longitude,
         EXTRACT(YEAR FROM AGE(u.birthdate)) as age,
         COALESCE(
           (SELECT file_path FROM user_images WHERE user_id = u.id AND is_profile_picture = true LIMIT 1),
@@ -111,7 +126,21 @@ export const getProfileViews = async (req, res) => {
       [userId]
     );
 
-    res.json(result.rows);
+    // Calculate distance for each user
+    const users = result.rows.map(user => {
+      let distance = null;
+      if (currentUser.latitude && currentUser.longitude && user.latitude && user.longitude) {
+        distance = calculateDistance(
+          currentUser.latitude,
+          currentUser.longitude,
+          user.latitude,
+          user.longitude
+        );
+      }
+      return { ...user, distance };
+    });
+
+    res.json(users);
   } catch (err) {
     console.error('Error getting profile views:', err);
     res.status(500).json({ error: 'Server error' });

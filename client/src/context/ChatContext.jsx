@@ -101,16 +101,43 @@ export const ChatProvider = ({ children }) => {
       setTyping(prev => ({ ...prev, [userId]: false }));
     };
 
+    const handleChatDeleted = ({ userId }) => {
+      // Remove messages for this user
+      setMessages(prev => {
+        const newMessages = { ...prev };
+        delete newMessages[userId];
+        return newMessages;
+      });
+
+      // Remove conversation from list
+      setConversations(prev => prev.filter(conv => conv.user_id !== userId));
+
+      // Reset unread count
+      setUnreadCounts(prev => {
+        const newCounts = { ...prev };
+        delete newCounts[userId];
+        return newCounts;
+      });
+
+      // If this was the active chat, close it
+      if (activeChat?.id === userId) {
+        setActiveChat(null);
+        toast('This conversation has been deleted', { icon: '💔' });
+      }
+    };
+
     socket.on('receive-message', handleReceiveMessage);
     socket.on('message-sent', handleMessageSent);
     socket.on('user-typing', handleUserTyping);
     socket.on('user-stopped-typing', handleUserStoppedTyping);
+    socket.on('chat-deleted', handleChatDeleted);
 
     return () => {
       socket.off('receive-message', handleReceiveMessage);
       socket.off('message-sent', handleMessageSent);
       socket.off('user-typing', handleUserTyping);
       socket.off('user-stopped-typing', handleUserStoppedTyping);
+      socket.off('chat-deleted', handleChatDeleted);
     };
   }, [socket, activeChat, user]);
 

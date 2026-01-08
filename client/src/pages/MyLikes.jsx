@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import ProfileCard from '../components/ProfileCard';
 
 const MyLikes = () => {
-  const [activeTab, setActiveTab] = useState('liked_me');
+  const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -14,6 +15,10 @@ const MyLikes = () => {
     { id: 'matches', label: 'Matches', icon: '💕', endpoint: '/likes/matches' },
     { id: 'viewed_me', label: 'Viewed Me', icon: '👀', endpoint: '/views' },
   ];
+
+  // Get active tab from URL or default to 'liked_me'
+  const tabFromUrl = searchParams.get('tab');
+  const activeTab = tabs.find((t) => t.id === tabFromUrl) ? tabFromUrl : 'liked_me';
 
   useEffect(() => {
     fetchUsers();
@@ -47,7 +52,7 @@ const MyLikes = () => {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => setSearchParams({ tab: tab.id })}
               className={`
                 whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors
                 ${
