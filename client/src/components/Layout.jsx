@@ -1,13 +1,18 @@
 import { Link, Outlet, useLocation } from 'react-router';
 import { useAuth } from '../context/AuthContext';
+import { useChat } from '../context/ChatContext';
 import { useState } from 'react';
 import logo from '../assets/logo_matcha.png';
 import NotificationBell from './NotificationBell';
 
 const Layout = () => {
   const { user, logout } = useAuth();
+  const { unreadCounts } = useChat();
   const location = useLocation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Calculate total unread messages
+  const totalUnread = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
 
   // Si l'utilisateur n'est pas chargé (ex: avant redirection), on affiche juste le contenu
   if (!user) return <Outlet />;
@@ -39,16 +44,6 @@ const Layout = () => {
                 }`}
               >
                 Discover
-              </Link>
-              <Link
-                to="/search"
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive('/search')
-                    ? 'text-primary1 bg-primary3/10'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                Search
               </Link>
               <Link
                 to="/likes"
@@ -85,6 +80,11 @@ const Layout = () => {
               >
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
               </svg>
+              {totalUnread > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full border-2 border-white flex items-center justify-center text-[10px] text-white font-bold">
+                  {totalUnread > 9 ? '9+' : totalUnread}
+                </span>
+              )}
             </Link>
 
             {/* 2. Notifications */}

@@ -118,3 +118,26 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(user_id, is_read);
+
+-- 10. TABLE MESSAGES (stores chat messages)
+CREATE TABLE IF NOT EXISTS messages (
+  id SERIAL PRIMARY KEY,
+  sender_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  receiver_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  CHECK (sender_id != receiver_id),
+  CHECK (LENGTH(content) > 0 AND LENGTH(content) <= 2000)
+);
+
+-- Indexes for efficient queries
+CREATE INDEX IF NOT EXISTS idx_messages_conversation
+  ON messages(sender_id, receiver_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_messages_unread
+  ON messages(receiver_id, is_read) WHERE is_read = false;
+
+CREATE INDEX IF NOT EXISTS idx_messages_users_time
+  ON messages(LEAST(sender_id, receiver_id), GREATEST(sender_id, receiver_id), created_at DESC);

@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from 'react-router';
 import Login from './Login';
 import Register from './Register';
 import Home from './Home';
-import Search from './Search';
 import VerifyEmail from './VerifyEmail';
 import ForgotPassword from './ForgotPassword';
 import ResetPassword from './ResetPassword';
@@ -10,6 +9,7 @@ import CompleteProfile from './CompleteProfile';
 import UserProfile from './UserProfile';
 import MyLikes from './MyLikes';
 import EditProfile from './EditProfile';
+import Chat from './Chat';
 import Layout from '../components/Layout';
 import PrivateRoute from '../components/PrivateRoute';
 
@@ -29,11 +29,10 @@ const App = () => {
 
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
-            <Route path="/search" element={<Search />} />
             <Route path="/user/:userId" element={<UserProfile />} />
             <Route path="/likes" element={<MyLikes />} />
             <Route path="/profile" element={<EditProfile />} />
-            <Route path="/chat" element={<div className="p-10 text-center">Page Chat (A faire)</div>} />
+            <Route path="/chat" element={<Chat />} />
           </Route>
         </Route>
 

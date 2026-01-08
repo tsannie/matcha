@@ -48,7 +48,7 @@ const ProfileCard = ({ user, onLikeChange }) => {
         {user.is_match && (
           <span className="absolute top-2 right-2 bg-pink-500 text-white text-xs px-2 py-1 rounded-full">Match!</span>
         )}
-        <div className="p-5 flex-grow flex flex-col gap-3">
+        <div className="py-5 flex-grow flex flex-col gap-3">
           {/* Tags */}
           <div className="flex flex-wrap gap-2">
             {user.tags &&
@@ -75,7 +75,7 @@ const ProfileCard = ({ user, onLikeChange }) => {
         </div>
       </Link>
 
-      <div className="px-5 pb-5">
+      <div className="px-5">
         <Button
           onClick={handleLike}
           className={`w-full flex items-center justify-center gap-2 transition-all py-3 ${

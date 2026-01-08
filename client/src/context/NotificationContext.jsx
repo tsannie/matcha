@@ -44,6 +44,11 @@ export const NotificationProvider = ({ children }) => {
     newSocket.on('notification', (notification) => {
       console.log('📬 Notification received:', notification);
 
+      // Skip message notifications - they're handled by ChatContext
+      if (notification.type === 'message') {
+        return;
+      }
+
       setNotifications(prev => [notification, ...prev]);
       setUnreadCount(prev => prev + 1);
 
@@ -68,6 +73,7 @@ export const NotificationProvider = ({ children }) => {
           duration: 3000
         });
       }
+      // Note: 'message' type notifications are handled by ChatContext to avoid duplicate toasts
     });
 
     // Listen for user status updates

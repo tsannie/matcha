@@ -14,6 +14,7 @@ import likeRoutes from './routes/likeRoutes.js';
 import viewRoutes from './routes/viewRoutes.js';
 import blockRoutes from './routes/blockRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
+import chatRoutes from './routes/chatRoutes.js';
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use('/api/likes', likeRoutes);
 app.use('/api/views', viewRoutes);
 app.use('/api/blocks', blockRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/chat', chatRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Create HTTP server and initialize Socket.io

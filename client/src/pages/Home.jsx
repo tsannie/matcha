@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import api from '../api/axios';
 import FilterSidebar from '../components/FilterSidebar';
@@ -12,8 +12,13 @@ const Home = () => {
 
   const [profiles, setProfiles] = useState([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [sortBy, setSortBy] = useState('smart');
   const [sortOrder, setSortOrder] = useState('desc');
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+
+  const observerTarget = useRef(null);
 
   const [filters, setFilters] = useState({
     age: [18, 50],
@@ -56,23 +61,72 @@ const Home = () => {
     return params.toString();
   };
 
-  const fetchProfiles = async () => {
+  const fetchProfiles = async (isLoadMore = false) => {
     try {
-      setLoadingProfiles(true);
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setLoadingProfiles(true);
+      }
+
       const queryString = buildQueryParams();
-      const res = await api.get(`/browsing/recommendations?${queryString}`);
-      setProfiles(res.data);
+      const currentOffset = isLoadMore ? offset : 0;
+      const res = await api.get(`/browsing/recommendations?${queryString}&limit=24&offset=${currentOffset}`);
+
+      if (isLoadMore) {
+        setProfiles(prev => [...prev, ...res.data]);
+      } else {
+        setProfiles(res.data);
+        setOffset(24);
+      }
+
+      // Si on reçoit moins de 24 profils, c'est qu'il n'y en a plus
+      setHasMore(res.data.length === 24);
+
+      if (isLoadMore) {
+        setOffset(prev => prev + 24);
+      }
     } catch (error) {
       console.error(error);
     } finally {
       setLoadingProfiles(false);
+      setLoadingMore(false);
     }
   };
 
+  // Reset et recharge quand les filtres/tri changent
   useEffect(() => {
     if (!authLoading && !user) return;
-    if (user) fetchProfiles();
+    if (user) {
+      setOffset(0);
+      setProfiles([]);
+      setHasMore(true);
+      fetchProfiles(false);
+    }
   }, [user, authLoading, filters, sortBy, sortOrder]);
+
+  // Intersection Observer pour le scroll infini
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore && !loadingProfiles) {
+          fetchProfiles(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [hasMore, loadingMore, loadingProfiles, offset]);
 
   if (authLoading) return null;
 
@@ -84,7 +138,10 @@ const Home = () => {
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div>
             <h1 className="text-2xl font-bold text-primary1">Discover</h1>
-            <p className="text-gray-500 text-sm">{profiles.length} profiles found</p>
+            <p className="text-gray-500 text-sm">
+              {profiles.length} profile{profiles.length !== 1 ? 's' : ''}
+              {hasMore && profiles.length > 0 && ' (scroll for more)'}
+            </p>
           </div>
 
           <div className="flex gap-3 items-center">
@@ -121,14 +178,31 @@ const Home = () => {
         {loadingProfiles ? (
           <div className="text-center py-20 animate-pulse text-gray-400">Loading profiles...</div>
         ) : profiles.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {profiles.map((profile) => (
-              <ProfileCard key={profile.id} user={profile} onLikeChange={fetchProfiles} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {profiles.map((profile) => (
+                <ProfileCard key={profile.id} user={profile} onLikeChange={() => fetchProfiles(false)} />
+              ))}
+            </div>
+
+            {/* Intersection Observer target */}
+            <div ref={observerTarget} className="w-full py-8">
+              {loadingMore && (
+                <div className="text-center">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary1"></div>
+                  <p className="text-sm text-gray-500 mt-2">Loading more profiles...</p>
+                </div>
+              )}
+              {!hasMore && !loadingMore && (
+                <div className="text-center text-gray-400 text-sm">
+                  You've seen all available profiles
+                </div>
+              )}
+            </div>
+          </>
         ) : (
           <div className="text-center py-20 bg-white rounded-xl border border-gray-100 shadow-sm">
-            <p className="text-xl text-gray-400 mb-2">No matches found 😢</p>
+            <p className="text-xl text-gray-400 mb-2">No matches found</p>
             <p className="text-sm text-gray-500">Try adjusting your filters to see more people.</p>
           </div>
         )}
