@@ -71,15 +71,13 @@ const MyLikes = () => {
         </div>
       ) : users.length === 0 ? (
         <div className="flex flex-col items-center justify-center min-h-[400px] text-gray-400">
-          <div className="text-6xl mb-4">
-            {tabs.find((t) => t.id === activeTab)?.icon}
-          </div>
+          <div className="text-6xl mb-4">{tabs.find((t) => t.id === activeTab)?.icon}</div>
           <p className="text-lg">No users found</p>
           <p className="text-sm mt-2">
-            {activeTab === 'liked_me' && "No one has liked you yet. Keep browsing!"}
+            {activeTab === 'liked_me' && 'No one has liked you yet. Keep browsing!'}
             {activeTab === 'i_liked' && "You haven't liked anyone yet. Start exploring!"}
-            {activeTab === 'matches' && "No matches yet. Like more profiles!"}
-            {activeTab === 'viewed_me' && "No one has viewed your profile yet."}
+            {activeTab === 'matches' && 'No matches yet. Like more profiles!'}
+            {activeTab === 'viewed_me' && 'No one has viewed your profile yet.'}
           </p>
         </div>
       ) : (

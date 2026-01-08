@@ -145,13 +145,8 @@ export const unlikeUser = async (req, res) => {
         'INSERT INTO notifications (user_id, type, from_user_id, message) VALUES ($1, $2, $3, $4)',
         [targetUserId, 'unlike', userId, `${currentUser.rows[0].username} unliked you`]
       );
-    }
 
-    // Update fame rating for the unliked user
-    await updateFameRating(targetUserId);
-
-    // Emit real-time notification if was connected
-    if (wasConnected.rows.length > 0) {
+      // Emit real-time notification
       emitNotification(targetUserId, {
         id: Date.now(),
         type: 'unlike',
@@ -162,6 +157,9 @@ export const unlikeUser = async (req, res) => {
         is_read: false
       });
     }
+
+    // Update fame rating for the unliked user
+    await updateFameRating(targetUserId);
 
     res.json({ success: true, message: 'User unliked successfully' });
   } catch (err) {
@@ -208,6 +206,10 @@ export const getLikesReceived = async (req, res) => {
         WHERE (blocker_id = $1 AND blocked_id = u.id)
            OR (blocker_id = u.id AND blocked_id = $1)
       )
+      AND NOT EXISTS(
+        SELECT 1 FROM likes
+        WHERE liker_id = $1 AND liked_id = u.id
+      )
       GROUP BY u.id, l.created_at
       ORDER BY l.created_at DESC`,
       [userId]
@@ -242,6 +244,7 @@ export const getLikesSent = async (req, res) => {
         ) as profile_picture,
         array_remove(array_agg(DISTINCT t.name), NULL) as tags,
         l.created_at as liked_at,
+        true as liked_by_me,
         EXISTS(SELECT 1 FROM likes WHERE liker_id = u.id AND liked_id = $1) as liked_by_them,
         EXISTS(
           SELECT 1 FROM likes l1
@@ -293,7 +296,9 @@ export const getMatches = async (req, res) => {
           (SELECT file_path FROM user_images WHERE user_id = u.id LIMIT 1)
         ) as profile_picture,
         array_remove(array_agg(DISTINCT t.name), NULL) as tags,
-        GREATEST(l1.created_at, l2.created_at) as matched_at
+        GREATEST(l1.created_at, l2.created_at) as matched_at,
+        true as liked_by_me,
+        true as is_match
       FROM likes l1
       JOIN likes l2 ON l1.liker_id = l2.liked_id AND l1.liked_id = l2.liker_id
       JOIN users u ON u.id = l1.liked_id

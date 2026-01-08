@@ -29,7 +29,7 @@ const pool = new Pool({
 const USERS_TO_CREATE = 50;
 const PARIS_LAT = 48.8566;
 const PARIS_LON = 2.3522;
-const CREDENTIALS_FILE = 'users_credentials.txt';
+const CSV_FILE = 'users_data.csv';
 
 const TAGS_LIST = [
   'Vegan',
@@ -54,7 +54,8 @@ const seed = async () => {
     console.log('🌱 Starting seed...');
     console.log(`Connecting to database: ${process.env.DB_NAME} as ${process.env.DB_USER}`);
 
-    fs.writeFileSync(CREDENTIALS_FILE, '--- USERS CREDENTIALS ---\n\n');
+    const csvHeader = 'ID,Email,Username,Password,Firstname,Lastname,Gender,Orientation,Age,Fame,Latitude,Longitude\n';
+    fs.writeFileSync(CSV_FILE, csvHeader);
 
     await pool.query(
       'TRUNCATE notifications, blocks, reports, profile_views, likes, user_images, user_tags, tags, users RESTART IDENTITY CASCADE'
@@ -87,6 +88,7 @@ const seed = async () => {
       else sexual_preference = 'bisexual';
 
       const birthdate = faker.date.birthdate({ min: 18, max: 60, mode: 'age' });
+      const age = new Date().getFullYear() - birthdate.getFullYear();
       const biography = faker.lorem.paragraph().substring(0, 200);
       const fameRating = faker.number.int({ min: 0, max: 500 });
 
@@ -116,10 +118,10 @@ const seed = async () => {
       );
       const userId = userRes.rows[0].id;
 
-      fs.appendFileSync(
-        CREDENTIALS_FILE,
-        `Email: ${email.padEnd(35)} | Username: ${username.padEnd(20)} | Password: Password123!\n`
-      );
+      const csvRow = `${userId},${email},${username},Password123!,${firstname},${lastname},${gender},${sexual_preference},${age},${fameRating},${latitude.toFixed(
+        4
+      )},${longitude.toFixed(4)}\n`;
+      fs.appendFileSync(CSV_FILE, csvRow);
 
       const shuffledTags = [...tagIds].sort(() => 0.5 - Math.random());
       const selectedTags = shuffledTags.slice(0, Math.floor(Math.random() * 4) + 1);
@@ -233,7 +235,7 @@ const seed = async () => {
     `);
 
     console.log(`\n✅ Seed completed successfully!`);
-    console.log(`📄 Credentials saved to ${CREDENTIALS_FILE}`);
+    console.log(`📄 User data and specs saved to ${CSV_FILE}`);
     process.exit(0);
   } catch (err) {
     console.error('\n❌ Error during seed:', err);
