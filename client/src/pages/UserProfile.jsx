@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import Button from '../components/ui/Button';
+import PhotoCarousel from '../components/ui/PhotoCarousel';
 
 const UserProfile = () => {
   const { userId } = useParams();
@@ -120,17 +121,7 @@ const UserProfile = () => {
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
         {/* Profile Header */}
         <div className="relative h-96 bg-gray-200">
-          {user.profile_picture ? (
-            <img
-              src={user.profile_picture}
-              alt={user.username}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-6xl text-gray-400">
-              {user.username.charAt(0).toUpperCase()}
-            </div>
-          )}
+          <PhotoCarousel images={user.images} username={user.username} />
 
           {/* Match Badge */}
           {user.is_match && (

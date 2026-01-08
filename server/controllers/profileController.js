@@ -214,15 +214,9 @@ export const getUserProfile = async (req, res) => {
 
     const user = userResult.rows[0];
 
-    // Get profile picture
-    const profilePicResult = await pool.query(
-      'SELECT file_path FROM user_images WHERE user_id = $1 AND is_profile_picture = true LIMIT 1',
-      [targetUserId]
-    );
-
     const userProfile = {
       ...user,
-      profile_picture: profilePicResult.rows[0]?.file_path || null,
+      images: await getImagesFromUserId(targetUserId),
       tags: await getTagsFromUserId(targetUserId),
     };
 

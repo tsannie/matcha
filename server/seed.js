@@ -133,7 +133,8 @@ const seed = async () => {
       const numImages = Math.floor(Math.random() * 5) + 1;
       for (let j = 0; j < numImages; j++) {
         const isProfile = j === 0;
-        const imageUrl = `https://xsgames.co/randomusers/avatar.php?g=${sex}&key=${userId}-${j}`;
+        const imgId = Math.floor(Math.random() * 79);
+        const imageUrl = `https://xsgames.co/randomusers/assets/avatars/${sex}/${imgId}.jpg`;
 
         await pool.query(`INSERT INTO user_images (user_id, file_path, is_profile_picture) VALUES ($1, $2, $3)`, [
           userId,
