@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
@@ -276,7 +276,7 @@ const EditProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-bg py-8">
+    <React.Fragment>
       <div className="max-w-4xl mx-auto px-4 space-y-6">
         <h1 className="text-3xl font-bold text-gray-900">Edit Profile</h1>
 
@@ -376,9 +376,7 @@ const EditProfile = () => {
         {/* SECTION 4: LOCATION */}
         <Card title="Location">
           <div className="space-y-4">
-            <p className="text-sm text-gray-500">
-              Set your location to help us find matches near you.
-            </p>
+            <p className="text-sm text-gray-500">Set your location to help us find matches near you.</p>
 
             <div className="flex items-center gap-3">
               <Button onClick={handleLocateMe} loading={locating} secondary={true}>
@@ -420,7 +418,7 @@ const EditProfile = () => {
           </div>
         </Card>
       </div>
-    </div>
+    </React.Fragment>
   );
 };
 

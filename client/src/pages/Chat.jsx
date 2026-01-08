@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useChat } from '../context/ChatContext';
 import ConversationList from '../components/chat/ConversationList';
 import MessageThread from '../components/chat/MessageThread';
@@ -12,7 +12,7 @@ const Chat = () => {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <React.Fragment>
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Messages</h1>
         <p className="text-gray-600">Chat with your matches</p>
@@ -23,12 +23,10 @@ const Chat = () => {
           <div className="w-1/3 border-r border-gray-200 overflow-y-auto">
             <ConversationList />
           </div>
-          <div className="flex-1 flex flex-col">
-            {activeChat ? <MessageThread /> : <EmptyState />}
-          </div>
+          <div className="flex-1 flex flex-col">{activeChat ? <MessageThread /> : <EmptyState />}</div>
         </div>
       </div>
-    </div>
+    </React.Fragment>
   );
 };
 
