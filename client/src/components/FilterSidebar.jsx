@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import RangeSlider from './ui/RangeSlider';
 import slidersIcon from '../assets/icons/sliders.svg';
-import tagIcon from '../assets/icons/tag.svg';
+import TagIcon from '../assets/icons/tag.svg?react';
 
 const COMMON_TAGS = [
   'vegan',
@@ -175,20 +175,7 @@ const FilterSidebar = ({ filters, setFilters }) => {
                     className="w-full pl-4 pr-10 py-2.5 bg-white border-2 border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-primary1 focus:ring-2 focus:ring-primary1/20 transition-all"
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                      <line x1="7" y1="7" x2="7.01" y2="7"></line>
-                    </svg>
+                    <TagIcon className="w-5 h-5" />
                   </div>
                 </div>
 

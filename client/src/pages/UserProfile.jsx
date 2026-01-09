@@ -4,7 +4,7 @@ import api from '../api/axios';
 import toast from 'react-hot-toast';
 import Button from '../components/ui/Button';
 import PhotoCarousel from '../components/ui/PhotoCarousel';
-import arrowLeftIcon from '../assets/icons/arrow-left.svg';
+import ArrowDown from '../assets/icons/arrow-down.svg?react';
 import reportIcon from '../assets/icons/report.svg';
 import blockIcon from '../assets/icons/block.svg';
 
@@ -48,15 +48,15 @@ const UserProfile = () => {
       if (user.liked_by_me) {
         await api.delete(`/likes/${userId}`);
         toast.success('Unliked');
-        setUser(prev => ({ ...prev, liked_by_me: false, is_match: false }));
+        setUser((prev) => ({ ...prev, liked_by_me: false, is_match: false }));
       } else {
         const { data } = await api.post(`/likes/${userId}`);
         if (data.isMatch) {
-          toast.success('It\'s a match! 💕', { duration: 4000 });
-          setUser(prev => ({ ...prev, liked_by_me: true, is_match: true }));
+          toast.success("It's a match! 💕", { duration: 4000 });
+          setUser((prev) => ({ ...prev, liked_by_me: true, is_match: true }));
         } else {
           toast.success('Liked! 💖');
-          setUser(prev => ({ ...prev, liked_by_me: true }));
+          setUser((prev) => ({ ...prev, liked_by_me: true }));
         }
       }
     } catch (error) {
@@ -111,11 +111,8 @@ const UserProfile = () => {
   return (
     <div className="max-w-4xl mx-auto py-8">
       {/* Header with back button */}
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-4 text-gray-600 hover:text-gray-900 flex items-center gap-2"
-      >
-        <img src={arrowLeftIcon} alt="" className="w-5 h-5" />
+      <button onClick={() => navigate(-1)} className="mb-4 text-gray-600 hover:text-gray-900 flex items-center gap-2">
+        <ArrowDown className="w-5 h-5 rotate-90" />
         Back
       </button>
 
@@ -149,9 +146,7 @@ const UserProfile = () => {
               </h1>
               <p className="text-gray-500">@{user.username}</p>
               {!user.is_online && user.last_seen && (
-                <p className="text-sm text-gray-400 mt-1">
-                  Last seen {new Date(user.last_seen).toLocaleDateString()}
-                </p>
+                <p className="text-sm text-gray-400 mt-1">Last seen {new Date(user.last_seen).toLocaleDateString()}</p>
               )}
             </div>
 
@@ -163,9 +158,7 @@ const UserProfile = () => {
 
           {/* Gender & Preference */}
           <div className="flex gap-4 mb-6">
-            <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-              {user.gender}
-            </span>
+            <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">{user.gender}</span>
             <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
               {user.sexual_preference}
             </span>
@@ -235,9 +228,7 @@ const UserProfile = () => {
             <h2 className="text-xl font-bold mb-4">Report User</h2>
             <form onSubmit={handleReport}>
               <label className="block mb-4">
-                <span className="text-sm text-gray-700 mb-2 block">
-                  Why are you reporting this user?
-                </span>
+                <span className="text-sm text-gray-700 mb-2 block">Why are you reporting this user?</span>
                 <textarea
                   value={reportReason}
                   onChange={(e) => setReportReason(e.target.value)}

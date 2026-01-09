@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useChat } from '../../context/ChatContext';
 import Button from '../ui/Button';
-import sendIcon from '../../assets/icons/send.svg';
+import SendIcon from '../../assets/icons/send.svg?react';
 
 const MessageInput = () => {
   const { activeChat, sendMessage, startTyping, stopTyping } = useChat();
@@ -62,17 +62,11 @@ const MessageInput = () => {
             }
           }}
         />
-        <Button
-          type="submit"
-          disabled={!content.trim()}
-          className="px-6 py-3"
-        >
-          <img src={sendIcon} alt="Send" className="w-5 h-5 invert" />
+        <Button type="submit" disabled={!content.trim()} className="px-6 py-3">
+          <SendIcon className="w-5 h-5" />
         </Button>
       </div>
-      <p className="text-xs text-gray-500 mt-1">
-        Press Enter to send, Shift+Enter for new line
-      </p>
+      <p className="text-xs text-gray-500 mt-1">Press Enter to send, Shift+Enter for new line</p>
     </form>
   );
 };

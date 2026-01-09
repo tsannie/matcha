@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { getImageUrl } from '../../utils/image';
-import chevronLeftIcon from '../../assets/icons/chevron-left.svg';
-import chevronRightIcon from '../../assets/icons/chevron-right.svg';
+import ChevronLeftIcon from '../../assets/icons/chevron-left.svg?react';
 
 const PhotoCarousel = ({ images, username }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -15,15 +14,11 @@ const PhotoCarousel = ({ images, username }) => {
   }
 
   const goToPrevious = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
-    );
+    setCurrentIndex((prevIndex) => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
   };
 
   const goToNext = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === images.length - 1 ? 0 : prevIndex + 1
-    );
+    setCurrentIndex((prevIndex) => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
   };
 
   const goToSlide = (index) => {
@@ -48,7 +43,7 @@ const PhotoCarousel = ({ images, username }) => {
             className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
             aria-label="Previous photo"
           >
-            <img src={chevronLeftIcon} alt="" className="w-6 h-6 invert" />
+            <ChevronLeftIcon className="w-6 h-6" />
           </button>
 
           {/* Next Button */}
@@ -57,7 +52,7 @@ const PhotoCarousel = ({ images, username }) => {
             className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
             aria-label="Next photo"
           >
-            <img src={chevronRightIcon} alt="" className="w-6 h-6 invert" />
+            <ChevronLeftIcon className="w-6 h-6 rotate-180" />
           </button>
 
           {/* Dots Indicators */}
@@ -67,9 +62,7 @@ const PhotoCarousel = ({ images, username }) => {
                 key={index}
                 onClick={() => goToSlide(index)}
                 className={`w-2 h-2 rounded-full transition-all ${
-                  index === currentIndex
-                    ? 'bg-white w-8'
-                    : 'bg-white/50 hover:bg-white/75'
+                  index === currentIndex ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/75'
                 }`}
                 aria-label={`Go to photo ${index + 1}`}
               />

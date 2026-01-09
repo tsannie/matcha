@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import checkIcon from '../assets/icons/check.svg';
-import xCloseIcon from '../assets/icons/x-close.svg';
+import XCloseIcon from '../assets/icons/x-close.svg?react';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
@@ -61,7 +61,14 @@ const VerifyEmail = () => {
         {status === 'success' && (
           <div className="flex flex-col items-center py-4">
             <div className="flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-600 mb-6">
-              <img src={checkIcon} alt="" className="h-8 w-8" style={{ filter: 'invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%)' }} />
+              <img
+                src={checkIcon}
+                alt=""
+                className="h-8 w-8"
+                style={{
+                  filter: 'invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%)',
+                }}
+              />
             </div>
             <h2 className="text-2xl font-bold text-primary1">Verified!</h2>
             <p className="text-gray-600 mt-2">Your email has been successfully verified.</p>
@@ -72,7 +79,7 @@ const VerifyEmail = () => {
         {status === 'error' && (
           <div className="flex flex-col items-center py-4">
             <div className="flex items-center justify-center h-16 w-16 rounded-full bg-red-100 text-red-600 mb-6">
-              <img src={xCloseIcon} alt="" className="h-8 w-8" style={{ filter: 'invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%)' }} />
+              <XCloseIcon className="w-8 h-8" />
             </div>
             <h2 className="text-2xl font-bold text-red-600">Verification Failed</h2>
             <p className="text-gray-600 mt-2">The link is invalid or has expired.</p>

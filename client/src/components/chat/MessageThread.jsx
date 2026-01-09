@@ -6,9 +6,9 @@ import api from '../../api/axios';
 import toast from 'react-hot-toast';
 import MessageInput from './MessageInput';
 import Message from './Message';
-import menuDotsIcon from '../../assets/icons/menu-dots.svg';
-import flagIcon from '../../assets/icons/flag.svg';
-import blockIcon from '../../assets/icons/block.svg';
+import MenuDotsIcon from '../../assets/icons/menu-dots.svg?react';
+import FlagIcon from '../../assets/icons/flag.svg?react';
+import BlockIcon from '../../assets/icons/block.svg?react';
 
 const MessageThread = () => {
   const { activeChat, messages, fetchMessages, typing, setActiveChat, fetchConversations } = useChat();
@@ -37,7 +37,11 @@ const MessageThread = () => {
   const isTyping = typing[activeChat?.id];
 
   const handleBlock = async () => {
-    if (!window.confirm(`Are you sure you want to block ${activeChat.username}? You will no longer be able to chat with them.`)) {
+    if (
+      !window.confirm(
+        `Are you sure you want to block ${activeChat.username}? You will no longer be able to chat with them.`
+      )
+    ) {
       return;
     }
 
@@ -79,9 +83,7 @@ const MessageThread = () => {
           </div>
           <div>
             <h3 className="font-semibold text-gray-900">{activeChat.username}</h3>
-            {isTyping && (
-              <span className="text-xs text-gray-500 italic">typing...</span>
-            )}
+            {isTyping && <span className="text-xs text-gray-500 italic">typing...</span>}
           </div>
         </div>
 
@@ -91,7 +93,7 @@ const MessageThread = () => {
             onClick={() => setShowMenu(!showMenu)}
             className="p-2 rounded-full hover:bg-gray-100 transition-colors"
           >
-            <img src={menuDotsIcon} alt="Menu" className="w-5 h-5 opacity-60" />
+            <MenuDotsIcon className="w-5 h-5 opacity-60" />
           </button>
 
           {showMenu && (
@@ -102,14 +104,14 @@ const MessageThread = () => {
                   onClick={handleReport}
                   className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                 >
-                  <img src={flagIcon} alt="" className="w-4 h-4" />
+                  <FlagIcon className="w-4 h-4" />
                   Report User
                 </button>
                 <button
                   onClick={handleBlock}
                   className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                 >
-                  <img src={blockIcon} alt="" className="w-4 h-4" />
+                  <BlockIcon className="w-4 h-4" />
                   Block User
                 </button>
               </div>
@@ -133,11 +135,7 @@ const MessageThread = () => {
         ) : (
           <div className="space-y-4">
             {chatMessages.map((msg) => (
-              <Message
-                key={msg.id}
-                message={msg}
-                isOwn={msg.sender_id === user.id}
-              />
+              <Message key={msg.id} message={msg} isOwn={msg.sender_id === user.id} />
             ))}
             <div ref={messagesEndRef} />
           </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from '../ui/Button';
 import { getImageUrl } from '../../utils/image';
-import plusIcon from '../../assets/icons/plus.svg';
+import PlusIcon from '../../assets/icons/plus.svg?react';
 
 const PhotosStep = ({ images, onUpload, onDelete, onSetProfile }) => {
   return (
@@ -55,7 +55,7 @@ const PhotosStep = ({ images, onUpload, onDelete, onSetProfile }) => {
         {images.length < 5 && (
           <label className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-primary1 hover:bg-primary1/5 transition-colors aspect-square group">
             <div className="p-4 bg-gray-100 rounded-full mb-2 group-hover:bg-white group-hover:scale-110 transition-transform">
-              <img src={plusIcon} alt="" className="h-6 w-6 opacity-40 group-hover:opacity-100" />
+              <PlusIcon className="h-6 w-6 opacity-40 group-hover:opacity-100" />
             </div>
             <span className="text-sm font-medium text-gray-500 group-hover:text-primary1">Add Photo</span>
             <input type="file" className="hidden" accept="image/*" onChange={onUpload} />

@@ -5,9 +5,8 @@ import FilterSidebar from '../components/FilterSidebar';
 import ProfileCard from '../components/ProfileCard';
 import { useAuth } from '../context/AuthContext';
 import Select from '../components/ui/Select';
-import sortDownIcon from '../assets/icons/sort-down.svg';
-import sortUpIcon from '../assets/icons/sort-up.svg';
-import chevronUpIcon from '../assets/icons/chevron-up.svg';
+import ArrowDownIcon from '../assets/icons/arrow-down.svg?react';
+import ChevronLeftIcon from '../assets/icons/chevron-left.svg?react';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -73,7 +72,7 @@ const Home = () => {
     }
 
     if (filters.active.tags && filters.tags.length > 0) {
-      filters.tags.forEach(tag => params.append('tags', tag));
+      filters.tags.forEach((tag) => params.append('tags', tag));
     }
 
     return params.toString();
@@ -92,7 +91,7 @@ const Home = () => {
       const res = await api.get(`/browsing/recommendations?${queryString}&limit=24&offset=${currentOffset}`);
 
       if (isLoadMore) {
-        setProfiles(prev => [...prev, ...res.data]);
+        setProfiles((prev) => [...prev, ...res.data]);
       } else {
         setProfiles(res.data);
         setOffset(24);
@@ -102,7 +101,7 @@ const Home = () => {
       setHasMore(res.data.length === 24);
 
       if (isLoadMore) {
-        setOffset(prev => prev + 24);
+        setOffset((prev) => prev + 24);
       }
     } catch (error) {
       console.error(error);
@@ -163,11 +162,7 @@ const Home = () => {
           </div>
 
           <div className="flex gap-3 items-center">
-            <Select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="min-w-[160px]"
-            >
+            <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="min-w-[160px]">
               <option value="smart">Smart Match</option>
               <option value="age">Age</option>
               <option value="distance">Distance</option>
@@ -180,7 +175,11 @@ const Home = () => {
               className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               title={`Sort ${sortOrder === 'asc' ? 'Ascending' : 'Descending'}`}
             >
-              <img src={sortOrder === 'asc' ? sortDownIcon : sortUpIcon} alt="Sort" className="w-5 h-5" />
+              {sortOrder === 'asc' ? (
+                <ArrowDownIcon className="w-5 h-5" />
+              ) : (
+                <ArrowDownIcon className="w-5 h-5 rotate-180" />
+              )}
             </button>
           </div>
         </div>
@@ -204,9 +203,7 @@ const Home = () => {
                 </div>
               )}
               {!hasMore && !loadingMore && (
-                <div className="text-center text-gray-400 text-sm">
-                  You've seen all available profiles
-                </div>
+                <div className="text-center text-gray-400 text-sm">You've seen all available profiles</div>
               )}
             </div>
           </>
@@ -226,7 +223,7 @@ const Home = () => {
         }`}
         aria-label="Scroll to top"
       >
-        <img src={chevronUpIcon} alt="Scroll to top" className="w-6 h-6 invert" />
+        <ChevronLeftIcon className="w-6 h-6 rotate-90" />
       </button>
     </div>
   );

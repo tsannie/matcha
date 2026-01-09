@@ -4,8 +4,7 @@ import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router';
 import { getImageUrl } from '../utils/image';
-import heartFilledIcon from '../assets/icons/heart-filled.svg';
-import heartOutlineIcon from '../assets/icons/heart-outline.svg';
+import HeartIcon from '../assets/icons/heart-outline.svg?react';
 
 const ProfileCard = ({ user, onLikeChange }) => {
   const handleLike = async () => {
@@ -85,7 +84,8 @@ const ProfileCard = ({ user, onLikeChange }) => {
             user.liked_by_me ? 'bg-pink-100 text-pink-600 border-pink-200 hover:bg-pink-200' : 'bg-primary1 text-white'
           }`}
         >
-          <img src={user.liked_by_me ? heartFilledIcon : heartOutlineIcon} alt="" className="w-5 h-5" />
+          {user.liked_by_me ? <HeartIcon className="w-5 h-5 fill-white" /> : <HeartIcon className="w-5 h-5" />}
+
           {user.liked_by_me ? 'Liked' : 'Like'}
         </Button>
       </div>

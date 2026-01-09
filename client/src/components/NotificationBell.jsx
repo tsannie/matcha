@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNotifications } from '../context/NotificationContext';
 import { formatDistanceToNow } from 'date-fns';
-// Import du SVG en tant que composant React pour garder le contrôle sur la couleur (currentColor)
 import BellIcon from '../assets/icons/bell.svg?react';
 
 const NotificationBell = () => {
@@ -67,8 +66,7 @@ const NotificationBell = () => {
         onClick={handleToggle}
         className="relative p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
       >
-        {/* Utilisation du SVG importé */}
-        <BellIcon width="24" height="24" />
+        <BellIcon className="w-6 h-6" />
 
         {unreadCount > 0 && (
           <span className="absolute top-1 right-1 h-5 w-5 bg-red-500 rounded-full border-2 border-white flex items-center justify-center text-[10px] text-white font-bold">
@@ -89,7 +87,7 @@ const NotificationBell = () => {
           <div className="overflow-y-auto flex-grow">
             {notifications.length === 0 ? (
               <div className="p-8 text-center text-gray-400">
-                <BellIcon width="48" height="48" className="mx-auto mb-2 opacity-50" />
+                <BellIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">No notifications yet</p>
               </div>
             ) : (
