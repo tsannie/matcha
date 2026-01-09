@@ -1,5 +1,6 @@
 import { useChat } from '../../context/ChatContext';
 import { formatDistanceToNow } from 'date-fns';
+import { getImageUrl } from '../../utils/image';
 
 const ConversationList = () => {
   const { conversations, activeChat, setActiveChat, unreadCounts } = useChat();
@@ -36,7 +37,7 @@ const ConversationList = () => {
                 <div className="h-12 w-12 rounded-full overflow-hidden bg-gray-200">
                   {conv.profile_picture ? (
                     <img
-                      src={`${import.meta.env.VITE_API_URL}${conv.profile_picture}`}
+                      src={getImageUrl(conv.profile_picture)}
                       alt={conv.username}
                       className="w-full h-full object-cover"
                     />

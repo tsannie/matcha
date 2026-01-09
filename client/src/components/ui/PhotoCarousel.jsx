@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getImageUrl } from '../../utils/image';
 
 const PhotoCarousel = ({ images, username }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -31,7 +32,7 @@ const PhotoCarousel = ({ images, username }) => {
     <div className="relative w-full h-full group">
       {/* Main Image */}
       <img
-        src={images[currentIndex].file_path}
+        src={getImageUrl(images[currentIndex].file_path)}
         alt={`${username} - photo ${currentIndex + 1}`}
         className="w-full h-full object-cover"
       />

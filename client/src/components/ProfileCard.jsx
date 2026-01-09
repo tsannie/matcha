@@ -3,6 +3,7 @@ import Button from './ui/Button';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router';
+import { getImageUrl } from '../utils/image';
 
 const ProfileCard = ({ user, onLikeChange }) => {
   const handleLike = async () => {
@@ -35,7 +36,7 @@ const ProfileCard = ({ user, onLikeChange }) => {
     <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300 h-full flex flex-col p-0 relative group hover:scale-[1.02]">
       <Link to={`/user/${user.id}`} className="flex-grow flex flex-col">
         <div className="relative h-80 w-full bg-gray-200">
-          <img src={user.profile_picture} alt={user.username} className="w-full h-full object-cover" />
+          <img src={getImageUrl(user.profile_picture)} alt={user.username} className="w-full h-full object-cover" />
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-5 text-white">
             <h3 className="text-2xl font-bold">
               {user.firstname}, {user.age}

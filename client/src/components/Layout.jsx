@@ -4,6 +4,7 @@ import { useChat } from '../context/ChatContext';
 import { useState } from 'react';
 import logo from '../assets/logo_matcha.png';
 import NotificationBell from './NotificationBell';
+import { getImageUrl } from '../utils/image';
 
 const Layout = () => {
   const { user, logout } = useAuth();
@@ -20,7 +21,7 @@ const Layout = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="min-h-screen bg-bg font-sans text-gray-900">
+    <div className="min-h-screen bg-bg font-sans text-gray-900 overflow-x-hidden">
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4">
         <div className="max-w-7xl mx-auto h-16 flex items-center justify-between">
           {/* GAUCHE : Logo + Navigation */}
@@ -99,7 +100,7 @@ const Layout = () => {
                 <div className="h-9 w-9 rounded-full overflow-hidden border border-gray-200 bg-gray-100">
                   {user.images && user.images.find((img) => img.is_profile_picture) ? (
                     <img
-                      src={user.images.find((img) => img.is_profile_picture).file_path}
+                      src={getImageUrl(user.images.find((img) => img.is_profile_picture).file_path)}
                       alt="Profile"
                       className="h-full w-full object-cover"
                     />

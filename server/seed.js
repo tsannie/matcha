@@ -26,7 +26,7 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-const USERS_TO_CREATE = 50;
+const USERS_TO_CREATE = 500;
 const PARIS_LAT = 48.8566;
 const PARIS_LON = 2.3522;
 const CSV_FILE = 'users_data.csv';

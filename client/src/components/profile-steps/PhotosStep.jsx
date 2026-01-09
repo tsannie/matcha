@@ -1,7 +1,6 @@
 import React from 'react';
 import Button from '../ui/Button';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { getImageUrl } from '../../utils/image';
 
 const PhotosStep = ({ images, onUpload, onDelete, onSetProfile }) => {
   return (
@@ -22,7 +21,7 @@ const PhotosStep = ({ images, onUpload, onDelete, onSetProfile }) => {
               ${img.is_profile_picture ? 'border-primary1 shadow-md' : 'border-transparent bg-gray-100'}
             `}
           >
-            <img src={`${API_URL}${img.file_path}`} alt="User content" className="w-full h-full object-cover" />
+            <img src={getImageUrl(img.file_path)} alt="User content" className="w-full h-full object-cover" />
 
             {img.is_profile_picture && (
               <div className="absolute top-2 left-2 bg-primary1 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm z-10">

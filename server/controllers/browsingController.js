@@ -43,6 +43,13 @@ export const getRecommendations = async (req, res) => {
          OR (blocker_id = u.id AND blocked_id = $1)
     )`);
 
+    // Filter out already matched users (mutual likes)
+    conditions.push(`NOT EXISTS(
+      SELECT 1 FROM likes l1
+      WHERE l1.liker_id = $1 AND l1.liked_id = u.id
+      AND EXISTS(SELECT 1 FROM likes l2 WHERE l2.liker_id = u.id AND l2.liked_id = $1)
+    )`);
+
     // Sexual preference filtering
     const userPreference = currentUser.sexual_preference || 'bisexual';
     const userGender = currentUser.gender;

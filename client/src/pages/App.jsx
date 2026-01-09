@@ -15,7 +15,7 @@ import PrivateRoute from '../components/PrivateRoute';
 
 const App = () => {
   return (
-    <div className="w-screen h-screen">
+    <div className="w-screen min-h-screen">
       <Routes>
         {/* Routes Publiques (Pas de Navbar) */}
         <Route path="/login" element={<Login />} />
