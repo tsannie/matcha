@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { getImageUrl } from '../../utils/image';
+import chevronLeftIcon from '../../assets/icons/chevron-left.svg';
+import chevronRightIcon from '../../assets/icons/chevron-right.svg';
 
 const PhotoCarousel = ({ images, username }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -46,9 +48,7 @@ const PhotoCarousel = ({ images, username }) => {
             className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
             aria-label="Previous photo"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M15 18l-6-6 6-6"/>
-            </svg>
+            <img src={chevronLeftIcon} alt="" className="w-6 h-6 invert" />
           </button>
 
           {/* Next Button */}
@@ -57,9 +57,7 @@ const PhotoCarousel = ({ images, username }) => {
             className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
             aria-label="Next photo"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M9 18l6-6-6-6"/>
-            </svg>
+            <img src={chevronRightIcon} alt="" className="w-6 h-6 invert" />
           </button>
 
           {/* Dots Indicators */}

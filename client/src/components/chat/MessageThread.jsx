@@ -6,6 +6,9 @@ import api from '../../api/axios';
 import toast from 'react-hot-toast';
 import MessageInput from './MessageInput';
 import Message from './Message';
+import menuDotsIcon from '../../assets/icons/menu-dots.svg';
+import flagIcon from '../../assets/icons/flag.svg';
+import blockIcon from '../../assets/icons/block.svg';
 
 const MessageThread = () => {
   const { activeChat, messages, fetchMessages, typing, setActiveChat, fetchConversations } = useChat();
@@ -88,22 +91,7 @@ const MessageThread = () => {
             onClick={() => setShowMenu(!showMenu)}
             className="p-2 rounded-full hover:bg-gray-100 transition-colors"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-gray-600"
-            >
-              <circle cx="12" cy="12" r="1"></circle>
-              <circle cx="12" cy="5" r="1"></circle>
-              <circle cx="12" cy="19" r="1"></circle>
-            </svg>
+            <img src={menuDotsIcon} alt="Menu" className="w-5 h-5 opacity-60" />
           </button>
 
           {showMenu && (
@@ -114,40 +102,14 @@ const MessageThread = () => {
                   onClick={handleReport}
                   className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
-                    <line x1="4" y1="22" x2="4" y2="15"></line>
-                  </svg>
+                  <img src={flagIcon} alt="" className="w-4 h-4" />
                   Report User
                 </button>
                 <button
                   onClick={handleBlock}
                   className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
-                  </svg>
+                  <img src={blockIcon} alt="" className="w-4 h-4" />
                   Block User
                 </button>
               </div>

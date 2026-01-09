@@ -4,6 +4,9 @@ import api from '../api/axios';
 import toast from 'react-hot-toast';
 import Button from '../components/ui/Button';
 import PhotoCarousel from '../components/ui/PhotoCarousel';
+import arrowLeftIcon from '../assets/icons/arrow-left.svg';
+import reportIcon from '../assets/icons/report.svg';
+import blockIcon from '../assets/icons/block.svg';
 
 const UserProfile = () => {
   const { userId } = useParams();
@@ -112,9 +115,7 @@ const UserProfile = () => {
         onClick={() => navigate(-1)}
         className="mb-4 text-gray-600 hover:text-gray-900 flex items-center gap-2"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M19 12H5M12 19l-7-7 7-7"/>
-        </svg>
+        <img src={arrowLeftIcon} alt="" className="w-5 h-5" />
         Back
       </button>
 
@@ -213,9 +214,7 @@ const UserProfile = () => {
               className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
               title="Report as fake"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 3h18v18H3zM12 8v5m0 4h.01"/>
-              </svg>
+              <img src={reportIcon} alt="Report" className="w-5 h-5" />
             </button>
 
             <button
@@ -223,10 +222,7 @@ const UserProfile = () => {
               className="px-4 py-3 border border-red-300 rounded-lg hover:bg-red-50 text-red-600"
               title="Block user"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-              </svg>
+              <img src={blockIcon} alt="Block" className="w-5 h-5" />
             </button>
           </div>
         </div>

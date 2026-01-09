@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useChat } from '../../context/ChatContext';
 import Button from '../ui/Button';
+import sendIcon from '../../assets/icons/send.svg';
 
 const MessageInput = () => {
   const { activeChat, sendMessage, startTyping, stopTyping } = useChat();
@@ -66,20 +67,7 @@ const MessageInput = () => {
           disabled={!content.trim()}
           className="px-6 py-3"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg>
+          <img src={sendIcon} alt="Send" className="w-5 h-5 invert" />
         </Button>
       </div>
       <p className="text-xs text-gray-500 mt-1">
