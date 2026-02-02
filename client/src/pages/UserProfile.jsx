@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import Button from '../components/ui/Button';
 import PhotoCarousel from '../components/ui/PhotoCarousel';
 import ArrowDown from '../assets/icons/arrow-down.svg?react';
-import reportIcon from '../assets/icons/report.svg';
+import ReportIcon from '../assets/icons/report.svg?react';
 import blockIcon from '../assets/icons/block.svg';
 
 const UserProfile = () => {
@@ -207,7 +207,7 @@ const UserProfile = () => {
               className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
               title="Report as fake"
             >
-              <img src={reportIcon} alt="Report" className="w-5 h-5" />
+              <ReportIcon className="w-5 h-5" />
             </button>
 
             <button
