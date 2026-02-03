@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
@@ -10,9 +9,9 @@ import Select from '../components/ui/Select';
 import TextArea from '../components/ui/TextArea';
 import InterestsStep from '../components/profile-steps/InterestsStep';
 import PhotosStep from '../components/profile-steps/PhotosStep';
+import LocationStep from '../components/profile-steps/LocationStep';
 
 const EditProfile = () => {
-  const navigate = useNavigate();
   const { user, updateUser } = useAuth();
 
   // Section states
@@ -27,13 +26,13 @@ const EditProfile = () => {
   const [location, setLocation] = useState({
     latitude: null,
     longitude: null,
+    name: null,
   });
 
   // Loading states
   const [savingPersonal, setSavingPersonal] = useState(false);
   const [savingTags, setSavingTags] = useState(false);
   const [savingLocation, setSavingLocation] = useState(false);
-  const [locating, setLocating] = useState(false);
 
   // Initialize from user context
   useEffect(() => {
@@ -49,6 +48,7 @@ const EditProfile = () => {
       setLocation({
         latitude: user.latitude || null,
         longitude: user.longitude || null,
+        name: user.location_name || null,
       });
     }
   }, [user]);
@@ -86,22 +86,6 @@ const EditProfile = () => {
     return true;
   };
 
-  const validateLocation = () => {
-    const lat = parseFloat(location.latitude);
-    const lon = parseFloat(location.longitude);
-
-    if (isNaN(lat) || lat < -90 || lat > 90) {
-      toast.error('Invalid latitude (must be -90 to 90)');
-      return false;
-    }
-
-    if (isNaN(lon) || lon < -180 || lon > 180) {
-      toast.error('Invalid longitude (must be -180 to 180)');
-      return false;
-    }
-
-    return true;
-  };
 
   // ============================================
   // SECTION 1: PERSONAL INFO HANDLERS
@@ -217,34 +201,15 @@ const EditProfile = () => {
   // SECTION 4: LOCATION HANDLERS
   // ============================================
 
-  const handleLocateMe = () => {
-    if (!navigator.geolocation) {
-      return toast.error('Geolocation not supported');
-    }
-
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-        setLocating(false);
-        toast.success('Location found!');
-      },
-      (error) => {
-        setLocating(false);
-        toast.error('Unable to retrieve location.');
-      }
-    );
-  };
-
-  const handleLocationChange = (field, value) => {
-    setLocation({ ...location, [field]: value });
+  const handleLocationUpdate = (latitude, longitude, name) => {
+    setLocation({ latitude, longitude, name });
   };
 
   const handleSaveLocation = async () => {
-    if (!validateLocation()) return;
+    if (location.latitude === null || location.longitude === null) {
+      toast.error('Please set your location first');
+      return;
+    }
 
     setSavingLocation(true);
     try {
@@ -376,39 +341,17 @@ const EditProfile = () => {
         {/* SECTION 4: LOCATION */}
         <Card title="Location">
           <div className="space-y-4">
-            <p className="text-sm text-gray-500">Set your location to help us find matches near you.</p>
+            <p className="text-sm text-gray-500">
+              Set your location to find matches near you.
+            </p>
 
-            <div className="flex items-center gap-3">
-              <Button onClick={handleLocateMe} loading={locating} secondary={true}>
-                {locating ? 'Locating...' : 'Use Current Location'}
-              </Button>
-              {location.latitude && location.longitude && (
-                <span className="text-sm text-green-600 font-medium">Location set</span>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                label="Latitude"
-                type="number"
-                value={location.latitude || ''}
-                onChange={(e) => handleLocationChange('latitude', e.target.value)}
-                placeholder="-90 to 90"
-                min="-90"
-                max="90"
-                step="any"
-              />
-              <Input
-                label="Longitude"
-                type="number"
-                value={location.longitude || ''}
-                onChange={(e) => handleLocationChange('longitude', e.target.value)}
-                placeholder="-180 to 180"
-                min="-180"
-                max="180"
-                step="any"
-              />
-            </div>
+            <LocationStep
+              latitude={location.latitude}
+              longitude={location.longitude}
+              locationName={location.name}
+              onLocationChange={handleLocationUpdate}
+              loading={savingLocation}
+            />
 
             <div className="flex justify-end pt-2">
               <Button onClick={handleSaveLocation} loading={savingLocation}>

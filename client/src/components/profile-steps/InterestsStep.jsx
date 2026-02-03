@@ -73,6 +73,7 @@ const InterestsStep = ({ tags, setTags }) => {
           value={tagInput}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
+          onBlur={addTag}
           disabled={isMaxReached} // <-- C'est ici que la magie opère
           className={`
             flex-grow outline-none bg-transparent min-w-[80px] py-1 text-sm

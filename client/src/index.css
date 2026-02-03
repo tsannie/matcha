@@ -22,8 +22,10 @@ body {
   width: 100%;
 }
 
-button {
-  cursor: pointer;
+@layer base {
+  button {
+    cursor: pointer;
+  }
 }
 
 @keyframes fade-in {

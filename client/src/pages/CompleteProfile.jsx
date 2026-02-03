@@ -32,6 +32,7 @@ const CompleteProfile = () => {
     images: [],
     latitude: null,
     longitude: null,
+    locationName: null,
   });
 
   useEffect(() => {
@@ -101,21 +102,8 @@ const CompleteProfile = () => {
     }
   };
 
-  const handleLocateMe = () => {
-    if (!navigator.geolocation) return toast.error('Geolocation not supported');
-    setSaving(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const loc = { latitude: position.coords.latitude, longitude: position.coords.longitude };
-        setProfile((prev) => ({ ...prev, ...loc }));
-        setSaving(false);
-        toast.success('Location found!');
-      },
-      (error) => {
-        setSaving(false);
-        toast.error('Unable to retrieve location.');
-      }
-    );
+  const handleLocationChange = (latitude, longitude, locationName) => {
+    setProfile((prev) => ({ ...prev, latitude, longitude, locationName }));
   };
 
   const isStepValid = () => {
@@ -127,6 +115,9 @@ const CompleteProfile = () => {
     }
     if (currentStep === 3) {
       return profile.images.length > 0;
+    }
+    if (currentStep === 4) {
+      return profile.latitude !== null && profile.longitude !== null;
     }
     return true;
   };
@@ -200,7 +191,8 @@ const CompleteProfile = () => {
             <LocationStep
               latitude={profile.latitude}
               longitude={profile.longitude}
-              onLocate={handleLocateMe}
+              locationName={profile.locationName}
+              onLocationChange={handleLocationChange}
               loading={saving}
             />
           )}
