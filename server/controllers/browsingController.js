@@ -1,6 +1,40 @@
 import pool from '../config/db.js';
 import { calculateDistance } from '../utils/distance.js';
 
+/**
+ * Calculate smart match score for a user
+ * Score = distance × 0.40 + tags × 0.25 + age × 0.20 + fame × 0.15
+ * @param {Object} user - User object with distance, common_tags_count, fame_rating, age
+ * @param {boolean} hasUserLocation - Whether the current user has location set
+ * @param {number|null} currentUserAge - Current user's age for age proximity calculation
+ * @returns {number} Smart score (0-100)
+ */
+const calculateSmartScore = (user, hasUserLocation, currentUserAge) => {
+  // Distance score: 100 × exp(-distance_km / 50) → closer = higher score
+  // If no location, use neutral score of 50
+  let distanceScore = 50;
+  if (hasUserLocation && user.distance !== null) {
+    distanceScore = 100 * Math.exp(-user.distance / 50);
+  }
+
+  // Tags score: min(100, (common_tags / 5) × 100)
+  const tagsScore = Math.min(100, (user.common_tags_count / 5) * 100);
+
+  // Age score: 100 × exp(-ageDiff / 10) → closer in age = higher score
+  // If no age data, use neutral score of 50
+  let ageScore = 50;
+  if (currentUserAge && user.age) {
+    const ageDiff = Math.abs(currentUserAge - user.age);
+    ageScore = 100 * Math.exp(-ageDiff / 10);
+  }
+
+  // Fame score: min(100, fame_rating)
+  const fameScore = Math.min(100, user.fame_rating || 0);
+
+  // Weighted composite score
+  return (distanceScore * 0.40) + (tagsScore * 0.25) + (ageScore * 0.20) + (fameScore * 0.15);
+};
+
 export const getRecommendations = async (req, res) => {
   const userId = req.user.id;
 
@@ -21,7 +55,9 @@ export const getRecommendations = async (req, res) => {
   try {
     // Get current user data for matching algorithm
     const currentUserResult = await pool.query(
-      'SELECT gender, sexual_preference, latitude, longitude FROM users WHERE id = $1',
+      `SELECT gender, sexual_preference, latitude, longitude,
+       EXTRACT(YEAR FROM AGE(birthdate)) as age
+       FROM users WHERE id = $1`,
       [userId]
     );
 
@@ -166,8 +202,8 @@ export const getRecommendations = async (req, res) => {
         break;
       case 'smart':
       default:
-        // Smart sorting: prioritize common tags, then fame, then distance
-        orderByClause = `ORDER BY common_tags_count ${orderDirection}, u.fame_rating ${orderDirection}`;
+        // Smart sorting done in JavaScript after distance calculation
+        // Uses weighted composite score: 40% distance + 25% tags + 20% age + 15% fame
         break;
     }
 
@@ -206,6 +242,19 @@ export const getRecommendations = async (req, res) => {
         if (b.distance === null) return -1;
         return orderDirection === 'ASC' ? a.distance - b.distance : b.distance - a.distance;
       });
+    }
+
+    // Smart sort: weighted composite score (40% distance + 25% tags + 20% age + 15% fame)
+    if (sortBy.toLowerCase() === 'smart') {
+      const hasUserLocation = !!(currentUser.latitude && currentUser.longitude);
+      const currentUserAge = currentUser.age ? parseInt(currentUser.age) : null;
+      users = users.map(user => ({
+        ...user,
+        smart_score: calculateSmartScore(user, hasUserLocation, currentUserAge)
+      }));
+      users.sort((a, b) => orderDirection === 'ASC'
+        ? a.smart_score - b.smart_score
+        : b.smart_score - a.smart_score);
     }
 
     res.json(users);
