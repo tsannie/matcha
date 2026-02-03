@@ -32,21 +32,21 @@ const PARIS_LON = 2.3522;
 const CSV_FILE = 'users_data.csv';
 
 const TAGS_LIST = [
-  'Vegan',
-  'Geek',
-  'Gym',
-  'Photography',
-  'Travel',
-  'Foodie',
-  'Music',
-  'Art',
-  'Tech',
-  'Nature',
-  'Cinema',
-  'CatLover',
-  'DogLover',
-  'Hiking',
-  'Coding',
+  'vegan',
+  'geek',
+  'gym',
+  'photography',
+  'travel',
+  'foodie',
+  'music',
+  'art',
+  'tech',
+  'nature',
+  'cinema',
+  'catlover',
+  'doglover',
+  'hiking',
+  'coding',
 ];
 
 const seed = async () => {
@@ -58,7 +58,7 @@ const seed = async () => {
     fs.writeFileSync(CSV_FILE, csvHeader);
 
     await pool.query(
-      'TRUNCATE notifications, blocks, reports, profile_views, likes, user_images, user_tags, tags, users RESTART IDENTITY CASCADE'
+      'TRUNCATE notifications, blocks, reports, profile_views, likes, user_images, user_tags, tags, users RESTART IDENTITY CASCADE',
     );
 
     const tagIds = [];
@@ -114,12 +114,12 @@ const seed = async () => {
           latitude,
           longitude,
           true,
-        ]
+        ],
       );
       const userId = userRes.rows[0].id;
 
       const csvRow = `${userId},${email},${username},${password},${firstname},${lastname},${gender},${sexual_preference},${age},${fameRating},${latitude.toFixed(
-        4
+        4,
       )},${longitude.toFixed(4)}\n`;
       fs.appendFileSync(CSV_FILE, csvRow);
 

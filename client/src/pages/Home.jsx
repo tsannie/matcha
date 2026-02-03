@@ -5,7 +5,7 @@ import FilterSidebar from '../components/FilterSidebar';
 import ProfileCard from '../components/ProfileCard';
 import { useAuth } from '../context/AuthContext';
 import Select from '../components/ui/Select';
-import ArrowDownIcon from '../assets/icons/arrow-down.svg?react';
+import SortOrderButton from '../components/ui/SortOrderButton';
 import ChevronLeftIcon from '../assets/icons/chevron-left.svg?react';
 
 const Home = () => {
@@ -179,17 +179,10 @@ const Home = () => {
               <option value="tags">Common Tags</option>
             </Select>
 
-            <button
-              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              title={`Sort ${sortOrder === 'asc' ? 'Ascending' : 'Descending'}`}
-            >
-              {sortOrder === 'asc' ? (
-                <ArrowDownIcon className="w-5 h-5" />
-              ) : (
-                <ArrowDownIcon className="w-5 h-5 rotate-180" />
-              )}
-            </button>
+            <SortOrderButton
+              sortOrder={sortOrder}
+              onToggle={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            />
           </div>
         </div>
 

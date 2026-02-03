@@ -159,7 +159,7 @@ export const getRecommendations = async (req, res) => {
         orderByClause = `ORDER BY u.fame_rating ${orderDirection}`;
         break;
       case 'tags':
-        orderByClause = `ORDER BY common_tags_count ${orderDirection}`;
+        orderByClause = `ORDER BY common_tags_count ${orderDirection}, u.fame_rating DESC`;
         break;
       case 'distance':
         // Distance will be calculated after query
@@ -167,7 +167,7 @@ export const getRecommendations = async (req, res) => {
       case 'smart':
       default:
         // Smart sorting: prioritize common tags, then fame, then distance
-        orderByClause = `ORDER BY common_tags_count DESC, u.fame_rating DESC`;
+        orderByClause = `ORDER BY common_tags_count ${orderDirection}, u.fame_rating ${orderDirection}`;
         break;
     }
 

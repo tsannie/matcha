@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
-import Button from '../components/ui/Button';
 import PhotoCarousel from '../components/ui/PhotoCarousel';
 import BlockModal from '../components/ui/BlockModal';
 import ReportModal from '../components/ui/ReportModal';
+import LikeButton from '../components/ui/LikeButton';
 import ArrowDown from '../assets/icons/arrow-down.svg?react';
 import ReportIcon from '../assets/icons/report.svg?react';
 import BlockIcon from '../assets/icons/block.svg?react';
@@ -45,25 +45,8 @@ const UserProfile = () => {
     }
   };
 
-  const handleLike = async () => {
-    try {
-      if (user.liked_by_me) {
-        await api.delete(`/likes/${userId}`);
-        toast.success('Unliked');
-        setUser((prev) => ({ ...prev, liked_by_me: false, is_match: false }));
-      } else {
-        const { data } = await api.post(`/likes/${userId}`);
-        if (data.isMatch) {
-          toast.success("It's a match! 💕", { duration: 4000 });
-          setUser((prev) => ({ ...prev, liked_by_me: true, is_match: true }));
-        } else {
-          toast.success('Liked! 💖');
-          setUser((prev) => ({ ...prev, liked_by_me: true }));
-        }
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to like');
-    }
+  const handleLikeChange = (liked, isMatch) => {
+    setUser((prev) => ({ ...prev, liked_by_me: liked, is_match: isMatch }));
   };
 
   const handleBlock = async () => {
@@ -190,16 +173,12 @@ const UserProfile = () => {
 
           {/* Action Buttons */}
           <div className="flex gap-3 mt-8">
-            <Button
-              onClick={handleLike}
-              className={`flex-grow py-3 text-lg ${
-                user.liked_by_me
-                  ? 'bg-pink-100 text-pink-600 border-pink-200 hover:bg-pink-200'
-                  : 'bg-primary1 text-white'
-              }`}
-            >
-              {user.liked_by_me ? '💖 Liked' : '💗 Like'}
-            </Button>
+            <LikeButton
+              userId={userId}
+              likedByMe={user.liked_by_me}
+              onLikeChange={handleLikeChange}
+              className="flex-grow py-3 text-lg"
+            />
 
             <button
               onClick={() => setShowReportModal(true)}
@@ -221,19 +200,11 @@ const UserProfile = () => {
       </div>
 
       {showReportModal && (
-        <ReportModal
-          username={user.username}
-          onSubmit={handleReport}
-          onCancel={() => setShowReportModal(false)}
-        />
+        <ReportModal username={user.username} onSubmit={handleReport} onCancel={() => setShowReportModal(false)} />
       )}
 
       {showBlockModal && (
-        <BlockModal
-          username={user.username}
-          onConfirm={handleBlock}
-          onCancel={() => setShowBlockModal(false)}
-        />
+        <BlockModal username={user.username} onConfirm={handleBlock} onCancel={() => setShowBlockModal(false)} />
       )}
     </div>
   );

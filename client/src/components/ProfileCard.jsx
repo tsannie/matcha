@@ -1,37 +1,12 @@
 import Card from './ui/Card';
-import Button from './ui/Button';
-import api from '../api/axios';
-import toast from 'react-hot-toast';
+import LikeButton from './ui/LikeButton';
 import { Link } from 'react-router';
 import { getImageUrl } from '../utils/image';
-import HeartIcon from '../assets/icons/heart-outline.svg?react';
 
 const ProfileCard = ({ user, onLikeChange }) => {
-  const handleLike = async () => {
-    try {
-      if (user.liked_by_me) {
-        await api.delete(`/likes/${user.id}`);
-        toast.success('Unliked');
-        if (onLikeChange) {
-          onLikeChange(user.id, false, false);
-        }
-      } else {
-        const { data } = await api.post(`/likes/${user.id}`);
-        if (data.isMatch) {
-          toast.success("It's a match! 💕", { duration: 4000 });
-        } else {
-          toast.success('Liked! 💖');
-        }
-        if (onLikeChange) {
-          onLikeChange(user.id, true, data.isMatch);
-        }
-      }
-    } catch (error) {
-      if (error.response?.status === 400 || error.response?.status === 403) {
-        toast.error(error.response.data.error || 'You need a profile picture to like others');
-      } else {
-        toast.error(error.response?.data?.error || 'Failed to like');
-      }
+  const handleLikeChange = (liked, isMatch) => {
+    if (onLikeChange) {
+      onLikeChange(user.id, liked, isMatch);
     }
   };
 
@@ -80,16 +55,12 @@ const ProfileCard = ({ user, onLikeChange }) => {
       </Link>
 
       <div className="px-5">
-        <Button
-          onClick={handleLike}
-          className={`w-full flex items-center justify-center gap-2 transition-all py-3 ${
-            user.liked_by_me ? 'bg-pink-100 text-pink-600 border-pink-200 hover:bg-pink-200' : 'bg-primary1 text-white'
-          }`}
-        >
-          {user.liked_by_me ? <HeartIcon className="w-5 h-5 fill-white" /> : <HeartIcon className="w-5 h-5" />}
-
-          {user.liked_by_me ? 'Liked' : 'Like'}
-        </Button>
+        <LikeButton
+          userId={user.id}
+          likedByMe={user.liked_by_me}
+          onLikeChange={handleLikeChange}
+          className="w-full py-3"
+        />
       </div>
     </Card>
   );

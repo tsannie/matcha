@@ -29,7 +29,7 @@ export const NotificationProvider = ({ children }) => {
     // Connect to Socket.io server
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const newSocket = io(API_URL, {
-      auth: { token }
+      auth: { token },
     });
 
     newSocket.on('connect', () => {
@@ -40,8 +40,8 @@ export const NotificationProvider = ({ children }) => {
       console.error('Socket connection error:', error);
     });
 
-    // Listen for notifications
-    newSocket.on('notification', (notification) => {
+    // Define handlers for cleanup
+    const handleNotification = (notification) => {
       console.log('📬 Notification received:', notification);
 
       // Skip message notifications - they're handled by ChatContext
@@ -49,42 +49,50 @@ export const NotificationProvider = ({ children }) => {
         return;
       }
 
-      setNotifications(prev => [notification, ...prev]);
-      setUnreadCount(prev => prev + 1);
+      setNotifications((prev) => [notification, ...prev]);
+      setUnreadCount((prev) => prev + 1);
 
       // Show toast notification
       if (notification.type === 'like') {
-        toast('💖 ' + notification.message, {
+        toast(notification.message, {
           icon: '💖',
-          duration: 3000
+          duration: 3000,
         });
       } else if (notification.type === 'match') {
-        toast.success('💕 ' + notification.message, {
-          duration: 5000
+        toast.success(notification.message, {
+          icon: '💕',
+          duration: 5000,
         });
       } else if (notification.type === 'view') {
-        toast('👀 ' + notification.message, {
+        toast(notification.message, {
           icon: '👀',
-          duration: 3000
+          duration: 3000,
         });
       } else if (notification.type === 'unlike') {
         toast(notification.message, {
           icon: '💔',
-          duration: 3000
+          duration: 3000,
         });
       }
       // Note: 'message' type notifications are handled by ChatContext to avoid duplicate toasts
-    });
+    };
 
-    // Listen for user status updates
-    newSocket.on('user-status', (data) => {
+    const handleUserStatus = (data) => {
       console.log('User status update:', data);
       // You can handle online/offline status here
-    });
+    };
+
+    // Listen for notifications
+    newSocket.on('notification', handleNotification);
+
+    // Listen for user status updates
+    newSocket.on('user-status', handleUserStatus);
 
     setSocket(newSocket);
 
     return () => {
+      newSocket.off('notification', handleNotification);
+      newSocket.off('user-status', handleUserStatus);
       newSocket.close();
     };
   }, [user]);
@@ -106,7 +114,7 @@ export const NotificationProvider = ({ children }) => {
         unreadCount,
         markAsRead,
         clearNotifications,
-        socket
+        socket,
       }}
     >
       {children}

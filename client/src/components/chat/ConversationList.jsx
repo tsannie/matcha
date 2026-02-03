@@ -26,7 +26,7 @@ const ConversationList = () => {
         return (
           <button
             key={conv.user_id}
-            onClick={() => setActiveChat({ id: conv.user_id, username: conv.username })}
+            onClick={() => setActiveChat({ id: conv.user_id, username: conv.username, profile_picture: conv.profile_picture })}
             className={`w-full p-4 text-left hover:bg-gray-50 transition-colors ${
               isActive ? 'bg-primary3/10 border-l-4 border-primary1' : ''
             }`}

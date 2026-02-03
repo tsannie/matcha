@@ -28,38 +28,44 @@ export const recordProfileView = async (req, res) => {
     }
 
     // Upsert profile view (update viewed_at if exists, insert if not)
-    await pool.query(
+    // RETURNING tells us if this was an insert or update
+    const viewResult = await pool.query(
       `INSERT INTO profile_views (viewer_id, viewed_id, viewed_at)
        VALUES ($1, $2, CURRENT_TIMESTAMP)
        ON CONFLICT (viewer_id, viewed_id)
-       DO UPDATE SET viewed_at = CURRENT_TIMESTAMP`,
+       DO UPDATE SET viewed_at = CURRENT_TIMESTAMP
+       RETURNING (xmax = 0) AS is_new_view`,
       [viewerId, viewedId]
     );
 
-    // Create notification for viewed user
-    const viewer = await pool.query(
-      'SELECT username FROM users WHERE id = $1',
-      [viewerId]
-    );
+    const isNewView = viewResult.rows[0]?.is_new_view;
 
-    await pool.query(
-      'INSERT INTO notifications (user_id, type, from_user_id, message) VALUES ($1, $2, $3, $4)',
-      [viewedId, 'view', viewerId, `${viewer.rows[0].username} viewed your profile`]
-    );
+    // Only create notification if this is a new view (not an update)
+    if (isNewView) {
+      const viewer = await pool.query(
+        'SELECT username FROM users WHERE id = $1',
+        [viewerId]
+      );
 
-    // Update fame rating for the viewed user
-    await updateFameRating(viewedId);
+      await pool.query(
+        'INSERT INTO notifications (user_id, type, from_user_id, message) VALUES ($1, $2, $3, $4)',
+        [viewedId, 'view', viewerId, `${viewer.rows[0].username} viewed your profile`]
+      );
 
-    // Emit real-time notification via Socket.io
-    emitNotification(viewedId, {
-      id: Date.now(),
-      type: 'view',
-      from_user_id: viewerId,
-      from_username: viewer.rows[0].username,
-      message: `${viewer.rows[0].username} viewed your profile`,
-      created_at: new Date(),
-      is_read: false
-    });
+      // Update fame rating for the viewed user
+      await updateFameRating(viewedId);
+
+      // Emit real-time notification via Socket.io
+      emitNotification(viewedId, {
+        id: Date.now(),
+        type: 'view',
+        from_user_id: viewerId,
+        from_username: viewer.rows[0].username,
+        message: `${viewer.rows[0].username} viewed your profile`,
+        created_at: new Date(),
+        is_read: false
+      });
+    }
 
     res.json({ success: true, message: 'Profile view recorded' });
   } catch (err) {

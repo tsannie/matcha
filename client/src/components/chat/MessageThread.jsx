@@ -11,6 +11,7 @@ import FlagIcon from '../../assets/icons/flag.svg?react';
 import BlockIcon from '../../assets/icons/block.svg?react';
 import BlockModal from '../ui/BlockModal';
 import ReportModal from '../ui/ReportModal';
+import { getImageUrl } from '../../utils/image';
 
 const MessageThread = () => {
   const { activeChat, messages, fetchMessages, typing, setActiveChat, fetchConversations } = useChat();
@@ -71,12 +72,20 @@ const MessageThread = () => {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-primary3/20 flex items-center justify-center text-primary1 font-bold">
-            {activeChat.username.charAt(0).toUpperCase()}
+          <div className="h-10 w-10 rounded-full overflow-hidden bg-primary3/20 flex items-center justify-center text-primary1 font-bold">
+            {activeChat.profile_picture ? (
+              <img
+                src={getImageUrl(activeChat.profile_picture)}
+                alt={activeChat.username}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              activeChat.username.charAt(0).toUpperCase()
+            )}
           </div>
           <div>
             <h3 className="font-semibold text-gray-900">{activeChat.username}</h3>
-            {isTyping && <span className="text-xs text-gray-500 italic">typing...</span>}
+            <span className={`text-xs text-gray-500 italic ${isTyping ? 'visible' : 'invisible'}`}>typing...</span>
           </div>
         </div>
 
