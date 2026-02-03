@@ -12,6 +12,9 @@ const ProfileCard = ({ user, onLikeChange }) => {
       if (user.liked_by_me) {
         await api.delete(`/likes/${user.id}`);
         toast.success('Unliked');
+        if (onLikeChange) {
+          onLikeChange(user.id, false, false);
+        }
       } else {
         const { data } = await api.post(`/likes/${user.id}`);
         if (data.isMatch) {
@@ -19,10 +22,9 @@ const ProfileCard = ({ user, onLikeChange }) => {
         } else {
           toast.success('Liked! 💖');
         }
-      }
-      // Notify parent to refresh data
-      if (onLikeChange) {
-        onLikeChange();
+        if (onLikeChange) {
+          onLikeChange(user.id, true, data.isMatch);
+        }
       }
     } catch (error) {
       if (error.response?.status === 400 || error.response?.status === 403) {

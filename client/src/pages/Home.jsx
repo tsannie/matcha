@@ -145,6 +145,15 @@ const Home = () => {
     };
   }, [hasMore, loadingMore, loadingProfiles, offset]);
 
+  // Update a single profile's like status locally (avoids refetching and scroll reset)
+  const handleLikeChange = (userId, likedByMe, isMatch) => {
+    setProfiles((prev) =>
+      prev.map((profile) =>
+        profile.id === userId ? { ...profile, liked_by_me: likedByMe, is_match: isMatch } : profile
+      )
+    );
+  };
+
   if (authLoading) return null;
 
   return (
@@ -190,7 +199,7 @@ const Home = () => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {profiles.map((profile) => (
-                <ProfileCard key={profile.id} user={profile} onLikeChange={() => fetchProfiles(false)} />
+                <ProfileCard key={profile.id} user={profile} onLikeChange={handleLikeChange} />
               ))}
             </div>
 

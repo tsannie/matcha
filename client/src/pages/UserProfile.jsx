@@ -4,9 +4,11 @@ import api from '../api/axios';
 import toast from 'react-hot-toast';
 import Button from '../components/ui/Button';
 import PhotoCarousel from '../components/ui/PhotoCarousel';
+import BlockModal from '../components/ui/BlockModal';
+import ReportModal from '../components/ui/ReportModal';
 import ArrowDown from '../assets/icons/arrow-down.svg?react';
 import ReportIcon from '../assets/icons/report.svg?react';
-import blockIcon from '../assets/icons/block.svg';
+import BlockIcon from '../assets/icons/block.svg?react';
 
 const UserProfile = () => {
   const { userId } = useParams();
@@ -14,7 +16,7 @@ const UserProfile = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [reportReason, setReportReason] = useState('');
+  const [showBlockModal, setShowBlockModal] = useState(false);
 
   useEffect(() => {
     fetchUserProfile();
@@ -65,28 +67,25 @@ const UserProfile = () => {
   };
 
   const handleBlock = async () => {
-    if (!window.confirm('Are you sure you want to block this user? This will remove all interactions between you.')) {
-      return;
-    }
-
     try {
       await api.post(`/blocks/${userId}`);
       toast.success('User blocked');
       navigate('/');
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to block user');
+    } finally {
+      setShowBlockModal(false);
     }
   };
 
-  const handleReport = async (e) => {
-    e.preventDefault();
+  const handleReport = async (reason) => {
     try {
-      await api.post(`/reports/${userId}`, { reason: reportReason });
+      await api.post(`/reports/${userId}`, { reason });
       toast.success('User reported. Thank you for keeping Matcha safe!');
-      setShowReportModal(false);
-      setReportReason('');
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to report user');
+    } finally {
+      setShowReportModal(false);
     }
   };
 
@@ -211,50 +210,30 @@ const UserProfile = () => {
             </button>
 
             <button
-              onClick={handleBlock}
+              onClick={() => setShowBlockModal(true)}
               className="px-4 py-3 border border-red-300 rounded-lg hover:bg-red-50 text-red-600"
               title="Block user"
             >
-              <img src={blockIcon} alt="Block" className="w-5 h-5" />
+              <BlockIcon className="w-5 h-5" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Report Modal */}
       {showReportModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6">
-            <h2 className="text-xl font-bold mb-4">Report User</h2>
-            <form onSubmit={handleReport}>
-              <label className="block mb-4">
-                <span className="text-sm text-gray-700 mb-2 block">Why are you reporting this user?</span>
-                <textarea
-                  value={reportReason}
-                  onChange={(e) => setReportReason(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary1 focus:border-transparent"
-                  rows="4"
-                  placeholder="Optional: Provide details..."
-                />
-              </label>
-              <div className="flex gap-3">
-                <Button type="submit" className="flex-grow bg-red-600 hover:bg-red-700">
-                  Submit Report
-                </Button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowReportModal(false);
-                    setReportReason('');
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <ReportModal
+          username={user.username}
+          onSubmit={handleReport}
+          onCancel={() => setShowReportModal(false)}
+        />
+      )}
+
+      {showBlockModal && (
+        <BlockModal
+          username={user.username}
+          onConfirm={handleBlock}
+          onCancel={() => setShowBlockModal(false)}
+        />
       )}
     </div>
   );

@@ -67,14 +67,14 @@ const seed = async () => {
       tagIds.push({ id: res.rows[0].id, name: tagName });
     }
 
-    const hashedPassword = await bcrypt.hash('Password123!', 10);
-
     for (let i = 0; i < USERS_TO_CREATE; i++) {
       const sex = faker.person.sexType();
       const firstname = faker.person.firstName(sex);
       const lastname = faker.person.lastName();
       const username = (firstname + lastname + i).toLowerCase().replace(/[^a-z0-9]/g, '');
       const email = faker.internet.email({ firstName: firstname, lastName: lastname + i });
+      const password = faker.internet.password({ length: 12, memorable: false });
+      const hashedPassword = await bcrypt.hash(password, 10);
 
       const latitude = PARIS_LAT + (Math.random() - 0.5) * 0.5;
       const longitude = PARIS_LON + (Math.random() - 0.5) * 0.5;
@@ -118,7 +118,7 @@ const seed = async () => {
       );
       const userId = userRes.rows[0].id;
 
-      const csvRow = `${userId},${email},${username},Password123!,${firstname},${lastname},${gender},${sexual_preference},${age},${fameRating},${latitude.toFixed(
+      const csvRow = `${userId},${email},${username},${password},${firstname},${lastname},${gender},${sexual_preference},${age},${fameRating},${latitude.toFixed(
         4
       )},${longitude.toFixed(4)}\n`;
       fs.appendFileSync(CSV_FILE, csvRow);
@@ -148,44 +148,82 @@ const seed = async () => {
 
     console.log('\n📊 Creating likes and interactions...');
 
-    const allUsersResult = await pool.query('SELECT id FROM users ORDER BY id');
-    const userIds = allUsersResult.rows.map((row) => row.id);
+    const allUsersResult = await pool.query('SELECT id, gender, sexual_preference FROM users ORDER BY id');
+    const users = allUsersResult.rows;
+    const userIds = users.map((row) => row.id);
+    const usersMap = new Map(users.map((u) => [u.id, u]));
+
+    // Check if a user is interested in a specific gender
+    const isInterestedIn = (user, targetGender) => {
+      if (user.sexual_preference === 'bisexual') return true;
+      if (user.sexual_preference === 'heterosexual') {
+        return user.gender !== targetGender;
+      }
+      if (user.sexual_preference === 'homosexual') {
+        return user.gender === targetGender;
+      }
+      return false;
+    };
+
+    // Check if two users can match based on sexual preferences
+    const canLike = (liker, liked) => {
+      return isInterestedIn(liker, liked.gender) && isInterestedIn(liked, liker.gender);
+    };
 
     const likesToCreate = Math.floor((userIds.length * userIds.length * 0.3) / 2);
     const createdLikes = new Set();
+    let attempts = 0;
+    const maxAttempts = likesToCreate * 10;
 
-    for (let i = 0; i < likesToCreate; i++) {
+    while (createdLikes.size < likesToCreate && attempts < maxAttempts) {
+      attempts++;
       const likerId = userIds[Math.floor(Math.random() * userIds.length)];
       const likedId = userIds[Math.floor(Math.random() * userIds.length)];
 
-      if (likerId !== likedId && !createdLikes.has(`${likerId}-${likedId}`)) {
-        try {
-          await pool.query('INSERT INTO likes (liker_id, liked_id) VALUES ($1, $2)', [likerId, likedId]);
-          createdLikes.add(`${likerId}-${likedId}`);
-        } catch (err) {}
-      }
+      if (likerId === likedId || createdLikes.has(`${likerId}-${likedId}`)) continue;
+
+      const liker = usersMap.get(likerId);
+      const liked = usersMap.get(likedId);
+
+      if (!canLike(liker, liked)) continue;
+
+      try {
+        await pool.query('INSERT INTO likes (liker_id, liked_id) VALUES ($1, $2)', [likerId, likedId]);
+        createdLikes.add(`${likerId}-${likedId}`);
+      } catch (err) {}
     }
 
+    // Create mutual matches (both users like each other) respecting preferences
     const matchesToCreate = Math.floor(userIds.length * 0.1);
-    for (let i = 0; i < matchesToCreate; i++) {
-      const user1 = userIds[Math.floor(Math.random() * userIds.length)];
-      const user2 = userIds[Math.floor(Math.random() * userIds.length)];
+    let matchesCreated = 0;
+    attempts = 0;
 
-      if (user1 !== user2) {
-        try {
-          await pool.query('INSERT INTO likes (liker_id, liked_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [
-            user1,
-            user2,
-          ]);
-          await pool.query('INSERT INTO likes (liker_id, liked_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [
-            user2,
-            user1,
-          ]);
-        } catch (err) {}
-      }
+    while (matchesCreated < matchesToCreate && attempts < matchesToCreate * 10) {
+      attempts++;
+      const user1Id = userIds[Math.floor(Math.random() * userIds.length)];
+      const user2Id = userIds[Math.floor(Math.random() * userIds.length)];
+
+      if (user1Id === user2Id) continue;
+
+      const user1 = usersMap.get(user1Id);
+      const user2 = usersMap.get(user2Id);
+
+      if (!canLike(user1, user2)) continue;
+
+      try {
+        await pool.query('INSERT INTO likes (liker_id, liked_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [
+          user1Id,
+          user2Id,
+        ]);
+        await pool.query('INSERT INTO likes (liker_id, liked_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [
+          user2Id,
+          user1Id,
+        ]);
+        matchesCreated++;
+      } catch (err) {}
     }
 
-    console.log(`✅ Created ${createdLikes.size} likes and ~${matchesToCreate} mutual matches`);
+    console.log(`✅ Created ${createdLikes.size} likes and ${matchesCreated} mutual matches`);
 
     const viewsToCreate = Math.floor((userIds.length * userIds.length * 0.4) / 2);
     const createdViews = new Set();

@@ -9,6 +9,8 @@ import Message from './Message';
 import MenuDotsIcon from '../../assets/icons/menu-dots.svg?react';
 import FlagIcon from '../../assets/icons/flag.svg?react';
 import BlockIcon from '../../assets/icons/block.svg?react';
+import BlockModal from '../ui/BlockModal';
+import ReportModal from '../ui/ReportModal';
 
 const MessageThread = () => {
   const { activeChat, messages, fetchMessages, typing, setActiveChat, fetchConversations } = useChat();
@@ -17,6 +19,8 @@ const MessageThread = () => {
   const messagesEndRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
+  const [showBlockModal, setShowBlockModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     if (activeChat) {
@@ -37,39 +41,28 @@ const MessageThread = () => {
   const isTyping = typing[activeChat?.id];
 
   const handleBlock = async () => {
-    if (
-      !window.confirm(
-        `Are you sure you want to block ${activeChat.username}? You will no longer be able to chat with them.`
-      )
-    ) {
-      return;
-    }
-
     try {
       await api.post(`/blocks/${activeChat.id}`);
       toast.success(`${activeChat.username} has been blocked`);
-      setShowMenu(false);
       setActiveChat(null);
-      fetchConversations(); // Refresh to remove blocked user from list
+      fetchConversations();
     } catch (error) {
       console.error('Error blocking user:', error);
       toast.error(error.response?.data?.error || 'Failed to block user');
+    } finally {
+      setShowBlockModal(false);
     }
   };
 
-  const handleReport = async () => {
-    const reason = window.prompt(`Why are you reporting ${activeChat.username}?`);
-    if (!reason || reason.trim() === '') {
-      return;
-    }
-
+  const handleReport = async (reason) => {
     try {
       await api.post(`/reports/${activeChat.id}`, { reason: reason.trim() });
       toast.success(`${activeChat.username} has been reported`);
-      setShowMenu(false);
     } catch (error) {
       console.error('Error reporting user:', error);
       toast.error(error.response?.data?.error || 'Failed to report user');
+    } finally {
+      setShowReportModal(false);
     }
   };
 
@@ -101,14 +94,20 @@ const MessageThread = () => {
               <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)}></div>
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-20">
                 <button
-                  onClick={handleReport}
+                  onClick={() => {
+                    setShowMenu(false);
+                    setShowReportModal(true);
+                  }}
                   className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                 >
                   <FlagIcon className="w-4 h-4" />
                   Report User
                 </button>
                 <button
-                  onClick={handleBlock}
+                  onClick={() => {
+                    setShowMenu(false);
+                    setShowBlockModal(true);
+                  }}
                   className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                 >
                   <BlockIcon className="w-4 h-4" />
@@ -144,6 +143,22 @@ const MessageThread = () => {
 
       {/* Input */}
       <MessageInput />
+
+      {showReportModal && (
+        <ReportModal
+          username={activeChat.username}
+          onSubmit={handleReport}
+          onCancel={() => setShowReportModal(false)}
+        />
+      )}
+
+      {showBlockModal && (
+        <BlockModal
+          username={activeChat.username}
+          onConfirm={handleBlock}
+          onCancel={() => setShowBlockModal(false)}
+        />
+      )}
     </>
   );
 };

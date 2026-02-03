@@ -38,6 +38,22 @@ const MyLikes = () => {
     }
   };
 
+  // Update like status locally to avoid scroll reset
+  const handleLikeChange = (userId, likedByMe, isMatch) => {
+    if (activeTab === 'i_liked' && !likedByMe) {
+      // Remove from list when unliking in "I Liked" tab
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+    } else if (activeTab === 'matches' && !likedByMe) {
+      // Remove from matches when unliking
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+    } else {
+      // Just update the status
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, liked_by_me: likedByMe, is_match: isMatch } : u))
+      );
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto">
       {/* Header */}
@@ -88,7 +104,7 @@ const MyLikes = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {users.map((user) => (
-            <ProfileCard key={user.id} user={user} onLikeChange={fetchUsers} />
+            <ProfileCard key={user.id} user={user} onLikeChange={handleLikeChange} />
           ))}
         </div>
       )}
