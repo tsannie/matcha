@@ -6,7 +6,7 @@ import BlockModal from './BlockModal';
 import ReportModal from './ReportModal';
 import LikeButton from './LikeButton';
 import XCloseIcon from '../../assets/icons/x-close.svg?react';
-import ReportIcon from '../../assets/icons/report.svg?react';
+import ReportIcon from '../../assets/icons/flag.svg?react';
 import BlockIcon from '../../assets/icons/block.svg?react';
 
 const UserProfileModal = ({ userId, onClose, onLikeChange }) => {
@@ -242,7 +242,7 @@ const UserProfileModal = ({ userId, onClose, onLikeChange }) => {
                 <button
                   onClick={() => setShowReportModal(true)}
                   className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
-                  title="Report as fake"
+                  title="Report user"
                 >
                   <ReportIcon className="w-5 h-5" />
                 </button>
