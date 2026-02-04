@@ -4,9 +4,7 @@ import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
-import Select from '../components/ui/Select';
-import TextArea from '../components/ui/TextArea';
+import AboutStep from '../components/profile-steps/AboutStep';
 import InterestsStep from '../components/profile-steps/InterestsStep';
 import PhotosStep from '../components/profile-steps/PhotosStep';
 import LocationStep from '../components/profile-steps/LocationStep';
@@ -18,7 +16,6 @@ const EditProfile = () => {
   const [personalInfo, setPersonalInfo] = useState({
     gender: '',
     sexual_preference: '',
-    birthdate: '',
     biography: '',
   });
   const [tags, setTags] = useState([]);
@@ -40,7 +37,6 @@ const EditProfile = () => {
       setPersonalInfo({
         gender: user.gender || '',
         sexual_preference: user.sexual_preference || '',
-        birthdate: user.birthdate ? user.birthdate.split('T')[0] : '',
         biography: user.biography || '',
       });
       setTags(user.tags || []);
@@ -73,19 +69,8 @@ const EditProfile = () => {
       return false;
     }
 
-    if (personalInfo.birthdate) {
-      const date = new Date(personalInfo.birthdate);
-      const age = Math.floor((new Date() - date) / (365.25 * 24 * 60 * 60 * 1000));
-
-      if (age < 18 || age > 120) {
-        toast.error('Age must be between 18 and 120 years');
-        return false;
-      }
-    }
-
     return true;
   };
-
 
   // ============================================
   // SECTION 1: PERSONAL INFO HANDLERS
@@ -103,7 +88,6 @@ const EditProfile = () => {
       const payload = {
         gender: personalInfo.gender,
         sexual_preference: personalInfo.sexual_preference,
-        birthdate: personalInfo.birthdate,
         biography: personalInfo.biography,
         latitude: user.latitude,
         longitude: user.longitude,
@@ -247,66 +231,28 @@ const EditProfile = () => {
 
         {/* ACCOUNT INFO (READ-ONLY) */}
         <Card title="Account Information">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-            <div>
-              <label className="block text-gray-500 mb-1">First Name</label>
-              <p className="font-medium text-gray-900">{user.firstname}</p>
-            </div>
-            <div>
-              <label className="block text-gray-500 mb-1">Last Name</label>
-              <p className="font-medium text-gray-900">{user.lastname}</p>
-            </div>
-            <div>
-              <label className="block text-gray-500 mb-1">Email</label>
-              <p className="font-medium text-gray-900">{user.email}</p>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+            {[
+              { label: 'First Name', value: user.firstname },
+              { label: 'Last Name', value: user.lastname },
+              { label: 'Email', value: user.email },
+              {
+                label: 'Birthdate',
+                value: user.birthdate ? new Date(user.birthdate).toLocaleDateString() : 'Not set',
+              },
+            ].map((field, index) => (
+              <div key={index}>
+                <label className="block text-gray-500 mb-1">{field.label}</label>
+                <p className="font-medium text-gray-900">{field.value}</p>
+              </div>
+            ))}
           </div>
         </Card>
 
         {/* SECTION 1: PERSONAL INFORMATION */}
         <Card title="Personal Information">
           <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Select
-                label="Gender"
-                value={personalInfo.gender}
-                onChange={(e) => handlePersonalInfoChange('gender', e.target.value)}
-                required
-                placeholder="Select gender"
-              >
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </Select>
-
-              <Select
-                label="Sexual Preference"
-                value={personalInfo.sexual_preference}
-                onChange={(e) => handlePersonalInfoChange('sexual_preference', e.target.value)}
-                required
-                placeholder="Select preference"
-              >
-                <option value="heterosexual">Heterosexual</option>
-                <option value="homosexual">Homosexual</option>
-                <option value="bisexual">Bisexual</option>
-              </Select>
-            </div>
-
-            <Input
-              label="Birthdate"
-              type="date"
-              value={personalInfo.birthdate}
-              onChange={(e) => handlePersonalInfoChange('birthdate', e.target.value)}
-              required
-            />
-
-            <TextArea
-              label="Biography"
-              value={personalInfo.biography}
-              onChange={(e) => handlePersonalInfoChange('biography', e.target.value)}
-              placeholder="Tell us about yourself..."
-              maxLength={500}
-              required
-            />
+            <AboutStep data={personalInfo} onChange={handlePersonalInfoChange} />
 
             <div className="flex justify-end pt-2">
               <Button onClick={handleSavePersonalInfo} loading={savingPersonal}>
@@ -341,9 +287,7 @@ const EditProfile = () => {
         {/* SECTION 4: LOCATION */}
         <Card title="Location">
           <div className="space-y-4">
-            <p className="text-sm text-gray-500">
-              Set your location to find matches near you.
-            </p>
+            <p className="text-sm text-gray-500">Set your location to find matches near you.</p>
 
             <LocationStep
               latitude={location.latitude}

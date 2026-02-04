@@ -48,10 +48,38 @@ body {
   }
 }
 
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes scale-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
 .animate-fade-in {
   animation: fade-in 0.2s ease-out;
 }
 
 .animate-scale-in {
   animation: scale-in 0.2s ease-out;
+}
+
+.animate-fade-out {
+  animation: fade-out 0.2s ease-in;
+}
+
+.animate-scale-out {
+  animation: scale-out 0.2s ease-in;
 }

@@ -6,7 +6,6 @@ import VerifyEmail from './VerifyEmail';
 import ForgotPassword from './ForgotPassword';
 import ResetPassword from './ResetPassword';
 import CompleteProfile from './CompleteProfile';
-import UserProfile from './UserProfile';
 import MyLikes from './MyLikes';
 import EditProfile from './EditProfile';
 import Chat from './Chat';
@@ -29,7 +28,6 @@ const App = () => {
 
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
-            <Route path="/user/:userId" element={<UserProfile />} />
             <Route path="/likes" element={<MyLikes />} />
             <Route path="/profile" element={<EditProfile />} />
             <Route path="/chat" element={<Chat />} />

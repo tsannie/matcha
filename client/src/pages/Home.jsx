@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import api from '../api/axios';
 import FilterSidebar from '../components/FilterSidebar';
 import ProfileCard from '../components/ProfileCard';
+import UserProfileModal from '../components/ui/UserProfileModal';
 import { useAuth } from '../context/AuthContext';
 import Select from '../components/ui/Select';
 import SortOrderButton from '../components/ui/SortOrderButton';
@@ -20,6 +21,7 @@ const Home = () => {
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
   const observerTarget = useRef(null);
 
@@ -154,6 +156,9 @@ const Home = () => {
     );
   };
 
+  const handleProfileClick = (userId) => setSelectedUserId(userId);
+  const handleCloseModal = () => setSelectedUserId(null);
+
   if (authLoading) return null;
 
   return (
@@ -192,7 +197,12 @@ const Home = () => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {profiles.map((profile) => (
-                <ProfileCard key={profile.id} user={profile} onLikeChange={handleLikeChange} />
+                <ProfileCard
+                  key={profile.id}
+                  user={profile}
+                  onLikeChange={handleLikeChange}
+                  onProfileClick={handleProfileClick}
+                />
               ))}
             </div>
 
@@ -227,6 +237,11 @@ const Home = () => {
       >
         <ChevronLeftIcon className="w-6 h-6 rotate-90" />
       </button>
+
+      {/* User Profile Modal */}
+      {selectedUserId && (
+        <UserProfileModal userId={selectedUserId} onClose={handleCloseModal} onLikeChange={handleLikeChange} />
+      )}
     </div>
   );
 };

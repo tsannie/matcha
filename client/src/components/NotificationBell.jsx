@@ -4,7 +4,7 @@ import { formatDistanceToNow } from 'date-fns';
 import BellIcon from '../assets/icons/bell.svg?react';
 
 const NotificationBell = () => {
-  const { notifications, unreadCount, markAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead, clearNotifications } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -79,8 +79,18 @@ const NotificationBell = () => {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[500px] overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+          <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+            {notifications.length > 0 && (
+              <button
+                onClick={() => {
+                  clearNotifications();
+                }}
+                className="text-xs text-red-600 hover:text-red-700 font-medium"
+              >
+                Clear All
+              </button>
+            )}
           </div>
 
           {/* Notifications List */}
@@ -95,7 +105,7 @@ const NotificationBell = () => {
                 {notifications.slice(0, 20).map((notification, index) => (
                   <div
                     key={notification.id || index}
-                    className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer border-l-4 ${getNotificationColor(
+                    className={`p-4 hover:bg-gray-50 transition-colors border-l-4 ${getNotificationColor(
                       notification.type
                     )}`}
                   >
@@ -113,18 +123,6 @@ const NotificationBell = () => {
               </div>
             )}
           </div>
-
-          {/* Footer */}
-          {notifications.length > 0 && (
-            <div className="px-4 py-2 border-t border-gray-200 bg-gray-50">
-              <button
-                onClick={() => setIsOpen(false)}
-                className="text-xs text-primary1 hover:text-primary2 font-medium"
-              >
-                View all notifications
-              </button>
-            </div>
-          )}
         </div>
       )}
     </div>

@@ -7,7 +7,6 @@ const InterestsStep = ({ tags, setTags }) => {
   const MAX_TAGS = 10;
   const isMaxReached = tags.length >= MAX_TAGS;
 
-  // 1. GESTION DE LA SAISIE
   const handleInputChange = (e) => {
     let val = e.target.value;
     if (val.length > 20) return;
@@ -15,7 +14,6 @@ const InterestsStep = ({ tags, setTags }) => {
     setTagInput(val.toLowerCase());
   };
 
-  // 2. GESTION DE LA VALIDATION
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ',' || e.key === ' ') {
       e.preventDefault();
@@ -33,7 +31,6 @@ const InterestsStep = ({ tags, setTags }) => {
       return toast.error('Tag already added');
     }
 
-    // Sécurité supplémentaire (même si l'input est désactivé)
     if (isMaxReached) return toast.error(`Max ${MAX_TAGS} tags allowed`);
 
     setTags([...tags, val]);
@@ -51,7 +48,6 @@ const InterestsStep = ({ tags, setTags }) => {
       </h2>
       <p className="text-gray-500 text-sm">Type a tag and press Space or Enter (ex: vegan, geek, gym...)</p>
 
-      {/* Le conteneur change de style si désactivé */}
       <div
         className={`
           border p-3 rounded-lg flex flex-wrap gap-2 items-center min-h-[50px] transition-all
@@ -74,7 +70,7 @@ const InterestsStep = ({ tags, setTags }) => {
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onBlur={addTag}
-          disabled={isMaxReached} // <-- C'est ici que la magie opère
+          disabled={isMaxReached}
           className={`
             flex-grow outline-none bg-transparent min-w-[80px] py-1 text-sm
             ${isMaxReached ? 'cursor-not-allowed placeholder-red-400' : 'placeholder-gray-400'}
@@ -85,7 +81,6 @@ const InterestsStep = ({ tags, setTags }) => {
         />
       </div>
 
-      {/* Petit compteur discret pour info */}
       <div className={`text-right text-xs ${isMaxReached ? 'text-red-500 font-medium' : 'text-gray-400'}`}>
         {tags.length}/{MAX_TAGS} tags
       </div>

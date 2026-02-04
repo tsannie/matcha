@@ -3,11 +3,13 @@ import { useSearchParams } from 'react-router';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import ProfileCard from '../components/ProfileCard';
+import UserProfileModal from '../components/ui/UserProfileModal';
 
 const MyLikes = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
   const tabs = [
     { id: 'liked_me', label: 'Liked Me', icon: '💖', endpoint: '/likes/received' },
@@ -53,6 +55,9 @@ const MyLikes = () => {
       );
     }
   };
+
+  const handleProfileClick = (userId) => setSelectedUserId(userId);
+  const handleCloseModal = () => setSelectedUserId(null);
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -104,9 +109,14 @@ const MyLikes = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {users.map((user) => (
-            <ProfileCard key={user.id} user={user} onLikeChange={handleLikeChange} />
+            <ProfileCard key={user.id} user={user} onLikeChange={handleLikeChange} onProfileClick={handleProfileClick} />
           ))}
         </div>
+      )}
+
+      {/* User Profile Modal */}
+      {selectedUserId && (
+        <UserProfileModal userId={selectedUserId} onClose={handleCloseModal} onLikeChange={handleLikeChange} />
       )}
     </div>
   );

@@ -227,17 +227,26 @@ const seed = async () => {
 
     const viewsToCreate = Math.floor((userIds.length * userIds.length * 0.4) / 2);
     const createdViews = new Set();
+    attempts = 0;
+    const maxViewAttempts = viewsToCreate * 10;
 
-    for (let i = 0; i < viewsToCreate; i++) {
+    while (createdViews.size < viewsToCreate && attempts < maxViewAttempts) {
+      attempts++;
       const viewerId = userIds[Math.floor(Math.random() * userIds.length)];
       const viewedId = userIds[Math.floor(Math.random() * userIds.length)];
 
-      if (viewerId !== viewedId && !createdViews.has(`${viewerId}-${viewedId}`)) {
-        try {
-          await pool.query('INSERT INTO profile_views (viewer_id, viewed_id) VALUES ($1, $2)', [viewerId, viewedId]);
-          createdViews.add(`${viewerId}-${viewedId}`);
-        } catch (err) {}
-      }
+      if (viewerId === viewedId || createdViews.has(`${viewerId}-${viewedId}`)) continue;
+
+      const viewer = usersMap.get(viewerId);
+      const viewed = usersMap.get(viewedId);
+
+      // Only create view if viewer is interested in viewed's gender
+      if (!isInterestedIn(viewer, viewed.gender)) continue;
+
+      try {
+        await pool.query('INSERT INTO profile_views (viewer_id, viewed_id) VALUES ($1, $2)', [viewerId, viewedId]);
+        createdViews.add(`${viewerId}-${viewedId}`);
+      } catch (err) {}
     }
 
     console.log(`✅ Created ${createdViews.size} profile views`);
