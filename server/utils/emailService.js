@@ -21,7 +21,7 @@ export const sendVerificationEmail = async (email, token) => {
   const url = `${process.env.CLIENT_URL}/verify-email?token=${token}`;
 
   const mailOptions = {
-    from: '"Matcha Team" <no-reply@matcha.com>',
+    from: `"Matcha Team" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: 'Verify your Matcha account',
     html: `
@@ -45,7 +45,7 @@ export const sendResetPasswordEmail = async (email, token) => {
   const url = `${process.env.CLIENT_URL}/reset-password?token=${token}`;
 
   const mailOptions = {
-    from: '"Matcha Team" <no-reply@matcha.com>',
+    from: `"Matcha Team" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: 'Reset your Password',
     html: `

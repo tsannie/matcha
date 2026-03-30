@@ -49,9 +49,7 @@ const EditProfile = () => {
     }
   }, [user]);
 
-  // ============================================
   // VALIDATION FUNCTIONS
-  // ============================================
 
   const validatePersonalInfo = () => {
     if (!personalInfo.gender || !personalInfo.sexual_preference) {
@@ -72,9 +70,7 @@ const EditProfile = () => {
     return true;
   };
 
-  // ============================================
   // SECTION 1: PERSONAL INFO HANDLERS
-  // ============================================
 
   const handlePersonalInfoChange = (field, value) => {
     setPersonalInfo({ ...personalInfo, [field]: value });
@@ -103,9 +99,7 @@ const EditProfile = () => {
     }
   };
 
-  // ============================================
   // SECTION 2: INTERESTS HANDLERS
-  // ============================================
 
   const handleSaveTags = async () => {
     if (tags.length === 0) {
@@ -125,9 +119,7 @@ const EditProfile = () => {
     }
   };
 
-  // ============================================
   // SECTION 3: PHOTOS HANDLERS
-  // ============================================
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -181,9 +173,7 @@ const EditProfile = () => {
     }
   };
 
-  // ============================================
   // SECTION 4: LOCATION HANDLERS
-  // ============================================
 
   const handleLocationUpdate = (latitude, longitude, name) => {
     setLocation({ latitude, longitude, name });
@@ -216,9 +206,7 @@ const EditProfile = () => {
     }
   };
 
-  // ============================================
   // RENDER
-  // ============================================
 
   if (!user) {
     return <div className="flex justify-center p-10">Loading...</div>;
@@ -249,7 +237,6 @@ const EditProfile = () => {
           </div>
         </Card>
 
-        {/* SECTION 1: PERSONAL INFORMATION */}
         <Card title="Personal Information">
           <div className="space-y-4">
             <AboutStep data={personalInfo} onChange={handlePersonalInfoChange} />
@@ -262,7 +249,6 @@ const EditProfile = () => {
           </div>
         </Card>
 
-        {/* SECTION 2: INTERESTS */}
         <Card title="Interests">
           <div className="space-y-4">
             <InterestsStep tags={tags} setTags={setTags} />
@@ -274,7 +260,6 @@ const EditProfile = () => {
           </div>
         </Card>
 
-        {/* SECTION 3: PHOTOS */}
         <Card title="Photos">
           <PhotosStep
             images={images}
@@ -284,7 +269,6 @@ const EditProfile = () => {
           />
         </Card>
 
-        {/* SECTION 4: LOCATION */}
         <Card title="Location">
           <div className="space-y-4">
             <p className="text-sm text-gray-500">Set your location to find matches near you.</p>

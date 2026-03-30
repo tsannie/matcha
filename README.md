@@ -1,16 +1,23 @@
-DB_USER=matcha_user
+```
+# Database
+DB_USER=matcha
 DB_PASSWORD=REDACTED_DB_PASSWORD
-DB_NAME=matcha_db
+DB_NAME=matcha
+
+# JWT
 JWT_SECRET=REDACTED_JWT_SECRET
 
-EMAIL_HOST=sandbox.smtp.mailtrap.io
-EMAIL_PORT=2525
+# Email - OVH
+EMAIL_HOST=ssl0.ovh.net
+EMAIL_PORT=587
 EMAIL_SECURE=false
-EMAIL_USER=REDACTED_SMTP_USER
+EMAIL_USER=matcha@sannie.fr
 EMAIL_PASS=REDACTED_SMTP_PASSWORD
-CLIENT_URL=http://localhost:5173
 
+# URLs
+CLIENT_URL=http://localhost:5173
 VITE_API_URL=http://localhost:5000
+```
 
 2#cS`xm00rxC
 P@$$w0rd123?
