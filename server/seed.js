@@ -26,7 +26,7 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-const USERS_TO_CREATE = 500;
+const DEFAULT_USERS_TO_CREATE = 500;
 const PARIS_LAT = 48.8566;
 const PARIS_LON = 2.3522;
 const CSV_FILE = 'users_data.csv';
@@ -49,7 +49,7 @@ const TAGS_LIST = [
   'coding',
 ];
 
-const seed = async () => {
+const seed = async (usersToCreate = DEFAULT_USERS_TO_CREATE) => {
   try {
     console.log('🌱 Starting seed...');
     console.log(`Connecting to database: ${process.env.DB_NAME} as ${process.env.DB_USER}`);
@@ -67,7 +67,7 @@ const seed = async () => {
       tagIds.push({ id: res.rows[0].id, name: tagName });
     }
 
-    for (let i = 0; i < USERS_TO_CREATE; i++) {
+    for (let i = 0; i < usersToCreate; i++) {
       const sex = faker.person.sexType();
       const firstname = faker.person.firstName(sex);
       const lastname = faker.person.lastName();
@@ -284,11 +284,15 @@ const seed = async () => {
 
     console.log(`\n✅ Seed completed successfully!`);
     console.log(`📄 User data and specs saved to ${CSV_FILE}`);
-    process.exit(0);
   } catch (err) {
     console.error('\n❌ Error during seed:', err);
-    process.exit(1);
+    throw err;
   }
 };
 
-seed();
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const n = parseInt(process.argv[2]) || DEFAULT_USERS_TO_CREATE;
+  seed(n).then(() => process.exit(0)).catch(() => process.exit(1));
+}
+
+export { seed };

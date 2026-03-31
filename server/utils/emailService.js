@@ -3,10 +3,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-console.log('Log used:', process.env.EMAIL_USER);
-console.log('Host used:', process.env.EMAIL_HOST);
-console.log('Port used:', process.env.EMAIL_PORT);
-console.log('Secure used:', process.env.EMAIL_PASS);
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: process.env.EMAIL_PORT,
@@ -34,7 +30,6 @@ export const sendVerificationEmail = async (email, token) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`Verification email sent to ${email}`);
   } catch (error) {
     console.error('Error sending email:', error);
     throw new Error('Email sending failed'); // Let the controller handle the error
@@ -59,7 +54,6 @@ export const sendResetPasswordEmail = async (email, token) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`Password reset email sent to ${email}`);
   } catch (error) {
     console.error('Error sending reset email:', error);
   }
