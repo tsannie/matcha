@@ -68,9 +68,9 @@ const FilterSidebar = ({ filters, setFilters }) => {
   }, [filters.active.tags, setFilters]);
 
   return (
-    <div className="w-full md:w-80 bg-white rounded-2xl shadow-lg border border-gray-100 h-fit flex-shrink-0 overflow-hidden transition-all duration-300 hover:shadow-xl">
+    <div className="w-full md:w-80 bg-white rounded-2xl shadow-lg border border-gray-100 h-fit flex-shrink-0 overflow-visible transition-all duration-300 hover:shadow-xl">
       {/* Header */}
-      <div className="p-6 bg-primary1 relative overflow-hidden">
+      <div className="p-6 bg-primary1 relative overflow-hidden rounded-t-2xl">
         <div className="absolute inset-0 opacity-20"></div>
 
         <div className="relative flex items-center justify-between">
@@ -123,8 +123,8 @@ const FilterSidebar = ({ filters, setFilters }) => {
             label="Distance (km)"
             min={0}
             max={500}
-            value={[0, filters.distance]}
-            onChange={(val) => setFilters((prev) => ({ ...prev, distance: val[1] }))}
+            value={filters.distance}
+            onChange={(val) => handleRangeChange('distance', val)}
             enabled={filters.active.distance}
             onToggle={() => toggleFilter('distance')}
           />

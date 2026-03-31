@@ -42,7 +42,7 @@ const Home = () => {
   const [filters, setFilters] = useState({
     age: [18, 50],
     fame: [0, 100],
-    distance: 50,
+    distance: [0, 50],
     tags: [],
     active: {
       age: false,
@@ -70,7 +70,8 @@ const Home = () => {
     }
 
     if (filters.active.distance) {
-      params.append('maxDistance', filters.distance);
+      params.append('minDistance', filters.distance[0]);
+      params.append('maxDistance', filters.distance[1]);
     }
 
     if (filters.active.tags && filters.tags.length > 0) {

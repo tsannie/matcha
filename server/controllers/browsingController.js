@@ -46,6 +46,7 @@ export const getRecommendations = async (req, res) => {
     maxAge,
     minFame,
     maxFame,
+    minDistance,
     maxDistance,
     tags: filterTags,
     limit = 50,
@@ -211,8 +212,13 @@ export const getRecommendations = async (req, res) => {
       query += ' ' + orderByClause;
     }
 
-    query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
-    queryParams.push(parseInt(limit), parseInt(offset));
+    // For smart/distance, sorting happens in JS after distance calculation,
+    // so SQL pagination would cut the pool before sorting — apply it in JS instead.
+    const sqlSortModes = ['age', 'fame', 'tags'];
+    if (sqlSortModes.includes(sortBy.toLowerCase())) {
+      query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+      queryParams.push(parseInt(limit), parseInt(offset));
+    }
 
     const result = await pool.query(query, queryParams);
 
@@ -233,6 +239,9 @@ export const getRecommendations = async (req, res) => {
     // Apply distance filter if specified
     if (maxDistance) {
       users = users.filter(user => user.distance !== null && user.distance <= parseFloat(maxDistance));
+    }
+    if (minDistance && parseFloat(minDistance) > 0) {
+      users = users.filter(user => user.distance !== null && user.distance >= parseFloat(minDistance));
     }
 
     // Sort by distance if requested
@@ -257,6 +266,13 @@ export const getRecommendations = async (req, res) => {
         : b.smart_score - a.smart_score);
     }
 
+    // Apply pagination in JS for smart/distance (SQL pagination was skipped above)
+    if (['smart', 'distance'].includes(sortBy.toLowerCase())) {
+      const off = parseInt(offset);
+      const lim = parseInt(limit);
+      users = users.slice(off, off + lim);
+    }
+
     res.json(users);
   } catch (err) {
     console.error(err);
@@ -276,6 +292,7 @@ export const searchUsers = async (req, res) => {
     maxAge,
     minFame,
     maxFame,
+    minDistance,
     maxDistance,
     location, // City or neighborhood search
     tags: filterTags,
@@ -450,6 +467,9 @@ export const searchUsers = async (req, res) => {
     // Apply distance filter if specified
     if (maxDistance) {
       users = users.filter(user => user.distance !== null && user.distance <= parseFloat(maxDistance));
+    }
+    if (minDistance && parseFloat(minDistance) > 0) {
+      users = users.filter(user => user.distance !== null && user.distance >= parseFloat(minDistance));
     }
 
     // Sort by distance if requested

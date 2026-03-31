@@ -240,8 +240,8 @@ const seed = async (usersToCreate = DEFAULT_USERS_TO_CREATE) => {
       const viewer = usersMap.get(viewerId);
       const viewed = usersMap.get(viewedId);
 
-      // Only create view if viewer is interested in viewed's gender
-      if (!isInterestedIn(viewer, viewed.gender)) continue;
+      // Only create view if both users are mutually compatible
+      if (!canLike(viewer, viewed)) continue;
 
       try {
         await pool.query('INSERT INTO profile_views (viewer_id, viewed_id) VALUES ($1, $2)', [viewerId, viewedId]);
