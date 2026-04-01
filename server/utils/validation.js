@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import zxcvbn from 'zxcvbn';
 
-/* --- HELPERS --- */
+/* HELPERS */
 
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -51,7 +51,7 @@ const validateBirthdate = (birthdate, required = false) => {
   return null;
 };
 
-/* --- AUTH VALIDATION --- */
+/* AUTH VALIDATION */
 
 export const validateRegistration = (email, username, password, firstname, lastname, birthdate) => {
   if (!email || !username || !password || !firstname || !lastname || !birthdate) {
@@ -76,7 +76,7 @@ export const validateResetPassword = (newPassword) => {
   return null;
 };
 
-/* --- PROFILE VALIDATION --- */
+/* PROFILE VALIDATION */
 
 export const validateProfileUpdate = (data) => {
   const { gender, sexual_preference, birthdate, biography, latitude, longitude } = data;

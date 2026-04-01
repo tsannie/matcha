@@ -25,11 +25,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Middleware
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-}));
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  }),
+);
 app.use(express.json());
 
 // Routes
@@ -43,7 +45,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Create HTTP server and initialize Socket.io
+// HTTP server and initialize Socket.io
 const server = createServer(app);
 initializeSocket(server);
 

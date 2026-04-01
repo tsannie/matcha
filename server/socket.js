@@ -4,30 +4,26 @@ import pool from './config/db.js';
 
 let io;
 
-/**
- * Update user online status in database
- */
+// Update user online status in database
 const updateUserStatus = async (userId, isOnline) => {
   try {
-    await pool.query(
-      'UPDATE users SET is_online = $1, last_seen = CURRENT_TIMESTAMP WHERE id = $2',
-      [isOnline, userId]
-    );
+    await pool.query('UPDATE users SET is_online = $1, last_seen = CURRENT_TIMESTAMP WHERE id = $2', [
+      isOnline,
+      userId,
+    ]);
   } catch (err) {
     console.error('Error updating user status:', err);
   }
 };
 
-/**
- * Initialize Socket.io server
- */
+// Initialize Socket.io server
 export const initializeSocket = (server) => {
   io = new Server(server, {
     cors: {
       origin: process.env.CLIENT_URL || 'http://localhost:5173',
       methods: ['GET', 'POST'],
-      credentials: true
-    }
+      credentials: true,
+    },
   });
 
   // Authentication middleware
@@ -61,7 +57,7 @@ export const initializeSocket = (server) => {
     // Broadcast online status to all connected users
     socket.broadcast.emit('user-status', {
       userId: socket.userId,
-      isOnline: true
+      isOnline: true,
     });
 
     socket.on('disconnect', () => {
@@ -73,7 +69,7 @@ export const initializeSocket = (server) => {
       // Broadcast offline status
       socket.broadcast.emit('user-status', {
         userId: socket.userId,
-        isOnline: false
+        isOnline: false,
       });
     });
 
@@ -99,7 +95,7 @@ export const initializeSocket = (server) => {
           `SELECT 1 FROM likes l1
            WHERE l1.liker_id = $1 AND l1.liked_id = $2
            AND EXISTS(SELECT 1 FROM likes l2 WHERE l2.liker_id = $2 AND l2.liked_id = $1)`,
-          [socket.userId, receiverId]
+          [socket.userId, receiverId],
         );
 
         if (match.rows.length === 0) {
@@ -111,7 +107,7 @@ export const initializeSocket = (server) => {
         const blocked = await pool.query(
           `SELECT 1 FROM blocks
            WHERE (blocker_id = $1 AND blocked_id = $2) OR (blocker_id = $2 AND blocked_id = $1)`,
-          [socket.userId, receiverId]
+          [socket.userId, receiverId],
         );
 
         if (blocked.rows.length > 0) {
@@ -122,7 +118,7 @@ export const initializeSocket = (server) => {
         // Insert message
         const result = await pool.query(
           'INSERT INTO messages (sender_id, receiver_id, content) VALUES ($1, $2, $3) RETURNING *',
-          [socket.userId, receiverId, trimmed]
+          [socket.userId, receiverId, trimmed],
         );
 
         const message = result.rows[0];
@@ -135,7 +131,7 @@ export const initializeSocket = (server) => {
           receiverId: message.receiver_id,
           content: message.content,
           createdAt: message.created_at,
-          isRead: false
+          isRead: false,
         });
 
         // Confirm to sender
@@ -143,14 +139,16 @@ export const initializeSocket = (server) => {
           id: message.id,
           receiverId,
           content: message.content,
-          createdAt: message.created_at
+          createdAt: message.created_at,
         });
 
         // Create and emit notification
-        await pool.query(
-          'INSERT INTO notifications (user_id, type, from_user_id, message) VALUES ($1, $2, $3, $4)',
-          [receiverId, 'message', socket.userId, `New message from ${socket.username}`]
-        );
+        await pool.query('INSERT INTO notifications (user_id, type, from_user_id, message) VALUES ($1, $2, $3, $4)', [
+          receiverId,
+          'message',
+          socket.userId,
+          `New message from ${socket.username}`,
+        ]);
 
         emitNotification(receiverId, {
           id: Date.now(),
@@ -159,9 +157,8 @@ export const initializeSocket = (server) => {
           from_username: socket.username,
           message: `New message from ${socket.username}`,
           created_at: new Date(),
-          is_read: false
+          is_read: false,
         });
-
       } catch (error) {
         console.error('Error sending message:', error);
         socket.emit('message-error', { error: 'Failed to send message' });
@@ -172,13 +169,13 @@ export const initializeSocket = (server) => {
     socket.on('typing-start', ({ receiverId }) => {
       io.to(`user:${receiverId}`).emit('user-typing', {
         userId: socket.userId,
-        username: socket.username
+        username: socket.username,
       });
     });
 
     socket.on('typing-stop', ({ receiverId }) => {
       io.to(`user:${receiverId}`).emit('user-stopped-typing', {
-        userId: socket.userId
+        userId: socket.userId,
       });
     });
 

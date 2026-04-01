@@ -1,17 +1,10 @@
 import pool from '../config/db.js';
 
-/**
- * Calculate and update fame rating for a user
- *
- * Fame rating formula:
- * - Likes received: +5 points each
- * - Profile views: +1 point each
- * - Photos uploaded: +2 points each
- * - Profile complete: +10 points bonus
- *
- * @param {number} userId - The ID of the user to update
- * @returns {Promise<number>} The new fame rating
- */
+// Fame rating formula:
+// - Likes received: +5 points each
+// - Profile views: +1 point each
+// - Photos uploaded: +2 points each
+// - Profile complete: +10 points bonus
 export const updateFameRating = async (userId) => {
   try {
     const query = `
@@ -42,18 +35,9 @@ export const updateFameRating = async (userId) => {
   }
 };
 
-/**
- * Get current fame rating for a user without updating
- *
- * @param {number} userId - The ID of the user
- * @returns {Promise<number>} The current fame rating
- */
 export const getFameRating = async (userId) => {
   try {
-    const result = await pool.query(
-      'SELECT fame_rating FROM users WHERE id = $1',
-      [userId]
-    );
+    const result = await pool.query('SELECT fame_rating FROM users WHERE id = $1', [userId]);
 
     if (result.rows.length > 0) {
       return result.rows[0].fame_rating;
