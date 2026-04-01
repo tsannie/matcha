@@ -110,9 +110,9 @@ export const unlikeUser = async (req, res) => {
       return res.status(404).json({ error: 'Like not found' });
     }
 
-    if (wasConnected.rows.length > 0) {
-      const currentUser = await pool.query('SELECT username FROM users WHERE id = $1', [userId]);
+    const currentUser = await pool.query('SELECT username FROM users WHERE id = $1', [userId]);
 
+    if (wasConnected.rows.length > 0) {
       await pool.query(
         'DELETE FROM messages WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1)',
         [userId, targetUserId],
@@ -120,15 +120,15 @@ export const unlikeUser = async (req, res) => {
 
       emitToUser(userId, 'chat-deleted', { userId: targetUserId });
       emitToUser(targetUserId, 'chat-deleted', { userId });
-
-      await createNotification(pool, {
-        userId: targetUserId,
-        type: 'unlike',
-        fromUserId: userId,
-        fromUsername: currentUser.rows[0].username,
-        message: `${currentUser.rows[0].username} unliked you`,
-      });
     }
+
+    await createNotification(pool, {
+      userId: targetUserId,
+      type: 'unlike',
+      fromUserId: userId,
+      fromUsername: currentUser.rows[0].username,
+      message: `${currentUser.rows[0].username} unliked you`,
+    });
 
     await updateFameRating(targetUserId);
 
