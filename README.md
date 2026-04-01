@@ -48,4 +48,4 @@ Same age → 100 pts; 10 years apart → ~37 pts; 20 years apart → ~14 pts.
 Falls back to 50 if either profile has no birthdate.
 
 ### Fame rating (15%)
-Direct fame score capped at 100.
+Fame score normalized from 0–1000 to 0–100.

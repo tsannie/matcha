@@ -8,7 +8,7 @@ import {
   computeDistances,
 } from '../utils/queryHelpers.js';
 
-// weights: distance 40%, tags 25%, age 20%, fame 15%
+// weights: distance 40%, tags 25%, age 20%, fame 15% (fame normalized 0-1000 → 0-100)
 const calculateSmartScore = (user, hasUserLocation, currentUserAge) => {
   let distanceScore = 50;
   if (hasUserLocation && user.distance !== null) {
@@ -22,7 +22,7 @@ const calculateSmartScore = (user, hasUserLocation, currentUserAge) => {
     ageScore = 100 * Math.exp(-Math.abs(currentUserAge - user.age) / 10);
   }
 
-  const fameScore = Math.min(100, user.fame_rating || 0);
+  const fameScore = Math.min(100, ((user.fame_rating || 0) / 1000) * 100);
 
   return distanceScore * 0.4 + tagsScore * 0.25 + ageScore * 0.2 + fameScore * 0.15;
 };
