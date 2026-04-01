@@ -109,7 +109,7 @@ const FilterSidebar = ({ filters, setFilters }) => {
           <RangeSlider
             label="Fame Rating"
             min={0}
-            max={1000}
+            max={100}
             value={filters.fame}
             onChange={(val) => handleRangeChange('fame', val)}
             enabled={filters.active.fame}

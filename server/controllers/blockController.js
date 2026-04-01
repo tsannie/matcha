@@ -1,5 +1,6 @@
 import pool from '../config/db.js';
 import { getIO } from '../socket.js';
+import { updateFameRating } from '../utils/fameRating.js';
 
 export const blockUser = async (req, res) => {
   const blockerId = req.user.id;
@@ -30,6 +31,8 @@ export const blockUser = async (req, res) => {
       blockedId,
     ]);
 
+    await updateFameRating(blockedId);
+
     try {
       const io = getIO();
       io.to(`user:${blockedId}`).emit('conversation_unavailable', { userId: blockerId });
@@ -59,6 +62,8 @@ export const unblockUser = async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Block not found' });
     }
+
+    await updateFameRating(blockedId);
 
     res.json({ success: true, message: 'User unblocked successfully' });
   } catch (err) {

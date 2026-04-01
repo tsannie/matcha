@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
@@ -9,6 +9,7 @@ import InterestsStep from '../components/profile-steps/InterestsStep';
 import PhotosStep from '../components/profile-steps/PhotosStep';
 import LocationStep from '../components/profile-steps/LocationStep';
 import { useAuth, checkProfileComplete } from '../context/AuthContext';
+import { getLocationFromIP, reverseGeocode } from '../utils/geocoding';
 
 const STEPS = [
   { id: 1, title: 'About You' },
@@ -23,6 +24,7 @@ const CompleteProfile = () => {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [saving, setSaving] = useState(false);
+  const completingRef = useRef(false);
 
   const [profile, setProfile] = useState({
     gender: '',
@@ -38,7 +40,6 @@ const CompleteProfile = () => {
   useEffect(() => {
     if (user) {
       if (checkProfileComplete(user)) {
-        toast('Profile already completed!', { icon: '✅' });
         navigate('/');
         return;
       }
@@ -117,7 +118,7 @@ const CompleteProfile = () => {
       return profile.images.length > 0;
     }
     if (currentStep === 4) {
-      return profile.latitude !== null && profile.longitude !== null;
+      return true; // Allow Finish — IP fallback handled in handleNext
     }
     return true;
   };
@@ -126,12 +127,30 @@ const CompleteProfile = () => {
     setSaving(true);
     try {
       if (currentStep === 1 || currentStep === 4) {
+        let { latitude, longitude } = profile;
+
+        // If no location chosen on last step, silently use IP geolocation
+        if (currentStep === 4 && latitude === null) {
+          const ipLoc = await getLocationFromIP();
+          if (ipLoc) {
+            const locationData = await reverseGeocode(ipLoc.lat, ipLoc.lon);
+            latitude = ipLoc.lat;
+            longitude = ipLoc.lon;
+            const name = locationData?.shortName || `${ipLoc.lat.toFixed(4)}, ${ipLoc.lon.toFixed(4)}`;
+            handleLocationChange(latitude, longitude, name);
+          } else {
+            setSaving(false);
+            toast.error('Could not detect your location. Please enter it manually.');
+            return;
+          }
+        }
+
         const payload = {
           gender: profile.gender,
           sexual_preference: profile.sexual_preference,
           biography: profile.biography,
-          latitude: profile.latitude,
-          longitude: profile.longitude,
+          latitude,
+          longitude,
         };
         const res = await api.put('/profile', payload);
         updateUser(res.data.user);
@@ -147,6 +166,7 @@ const CompleteProfile = () => {
       if (currentStep < STEPS.length) {
         setCurrentStep(currentStep + 1);
       } else {
+        completingRef.current = true;
         toast.success('Profile completed!');
         navigate('/');
       }
@@ -167,10 +187,7 @@ const CompleteProfile = () => {
   return (
     <div className="min-h-screen bg-bg flex flex-col items-center py-10 px-4">
       <div className="w-full max-w-2xl flex justify-end mb-4">
-        <button
-          onClick={handleLogout}
-          className="text-sm text-gray-500 hover:text-red-500 transition-colors"
-        >
+        <button onClick={handleLogout} className="text-sm text-gray-500 hover:text-red-500 transition-colors">
           Log out
         </button>
       </div>

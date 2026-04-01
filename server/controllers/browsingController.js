@@ -22,7 +22,7 @@ const calculateSmartScore = (user, hasUserLocation, currentUserAge) => {
     ageScore = 100 * Math.exp(-Math.abs(currentUserAge - user.age) / 10);
   }
 
-  const fameScore = Math.min(100, ((user.fame_rating || 0) / 1000) * 100);
+  const fameScore = Math.max(0, Math.min(100, user.fame_rating || 0));
 
   return distanceScore * 0.4 + tagsScore * 0.25 + ageScore * 0.2 + fameScore * 0.15;
 };

@@ -9,7 +9,7 @@ import XCloseIcon from '../../assets/icons/x-close.svg?react';
 import ReportIcon from '../../assets/icons/flag.svg?react';
 import BlockIcon from '../../assets/icons/block.svg?react';
 
-const UserProfileModal = ({ userId, onClose, onLikeChange }) => {
+const UserProfileModal = ({ userId, onClose, onLikeChange, onBlock }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showReportModal, setShowReportModal] = useState(false);
@@ -84,6 +84,7 @@ const UserProfileModal = ({ userId, onClose, onLikeChange }) => {
     try {
       await api.post(`/blocks/${userId}`);
       toast.success('User blocked');
+      if (onBlock) onBlock(userId);
       handleClose();
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to block user');

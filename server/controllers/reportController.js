@@ -1,4 +1,5 @@
 import pool from '../config/db.js';
+import { updateFameRating } from '../utils/fameRating.js';
 
 export const reportUser = async (req, res) => {
   const reporterId = req.user.id;
@@ -27,6 +28,8 @@ export const reportUser = async (req, res) => {
        DO UPDATE SET reason = $3, created_at = CURRENT_TIMESTAMP`,
       [reporterId, reportedId, reason || null],
     );
+
+    await updateFameRating(reportedId);
 
     console.log(
       `🚨 User ${reporterId} reported user ${reportedId} (${reportedUser.rows[0].username}) as fake account. Reason: ${reason || 'No reason provided'}`,

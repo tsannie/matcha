@@ -1,19 +1,31 @@
 const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org';
 
-/**
- * Format a short readable name from Nominatim result
- */
+export const getLocationFromIP = async () => {
+  try {
+    const response = await fetch('https://ipapi.co/json/');
+    if (!response.ok) return null;
+    const data = await response.json();
+    if (data.latitude && data.longitude) {
+      return { lat: data.latitude, lon: data.longitude };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
 const formatShortName = (item) => {
   const parts = [];
 
   if (item.address) {
     // Try to get the most relevant local name
-    const localName = item.address.city ||
-                      item.address.town ||
-                      item.address.village ||
-                      item.address.municipality ||
-                      item.address.suburb ||
-                      item.address.neighbourhood;
+    const localName =
+      item.address.city ||
+      item.address.town ||
+      item.address.village ||
+      item.address.municipality ||
+      item.address.suburb ||
+      item.address.neighbourhood;
 
     if (localName) parts.push(localName);
 
@@ -33,12 +45,6 @@ const formatShortName = (item) => {
   return parts.join(', ');
 };
 
-/**
- * Search for locations by query string
- * @param {string} query - Search query (e.g., "Paris")
- * @param {number} limit - Max results (default 5)
- * @returns {Promise<Array<{displayName, shortName, latitude, longitude}>>}
- */
 export const searchLocation = async (query, limit = 5) => {
   if (!query || query.trim().length < 2) {
     return [];
@@ -78,12 +84,6 @@ export const searchLocation = async (query, limit = 5) => {
   }
 };
 
-/**
- * Reverse geocode coordinates to location name
- * @param {number} latitude
- * @param {number} longitude
- * @returns {Promise<{displayName, shortName, city, country} | null>}
- */
 export const reverseGeocode = async (latitude, longitude) => {
   try {
     const params = new URLSearchParams({

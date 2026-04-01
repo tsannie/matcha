@@ -90,7 +90,7 @@ const seed = async (usersToCreate = DEFAULT_USERS_TO_CREATE) => {
       const birthdate = faker.date.birthdate({ min: 18, max: 60, mode: 'age' });
       const age = new Date().getFullYear() - birthdate.getFullYear();
       const biography = faker.lorem.paragraph().substring(0, 200);
-      const fameRating = faker.number.int({ min: 0, max: 500 });
+      const fameRating = 0; // recalculated in bulk at the end
 
       const userRes = await pool.query(
         `INSERT INTO users (
@@ -270,16 +270,28 @@ const seed = async (usersToCreate = DEFAULT_USERS_TO_CREATE) => {
 
     console.log('📈 Updating fame ratings...');
     await pool.query(`
-      UPDATE users
-      SET fame_rating = (
-        SELECT COALESCE(
-          (SELECT COUNT(*) * 5 FROM likes WHERE liked_id = users.id) +
-          (SELECT COUNT(*) FROM profile_views WHERE viewed_id = users.id) +
-          (SELECT COUNT(*) * 2 FROM user_images WHERE user_id = users.id) +
-          CASE WHEN profile_complete THEN 10 ELSE 0 END,
-          0
-        )
+      WITH stats AS (
+        SELECT
+          u.id,
+          (SELECT COUNT(*) FROM likes WHERE liked_id = u.id)::float AS likes,
+          (SELECT COUNT(*) FROM profile_views WHERE viewed_id = u.id)::float AS views,
+          (SELECT COUNT(*) FROM user_images WHERE user_id = u.id) AS photos,
+          (SELECT COUNT(*) FROM blocks WHERE blocked_id = u.id) AS blocks,
+          (SELECT COUNT(*) FROM reports WHERE reported_id = u.id) AS reports,
+          u.profile_complete
+        FROM users u
       )
+      UPDATE users
+      SET fame_rating = GREATEST(0, COALESCE(
+        CASE WHEN stats.views = 0 THEN 0 ELSE LEAST(1.0, stats.likes / stats.views) END * 80
+        + stats.photos * 2
+        + CASE WHEN stats.profile_complete THEN 10 ELSE 0 END
+        - stats.blocks * 3
+        - stats.reports * 5,
+        0
+      ))
+      FROM stats
+      WHERE users.id = stats.id
     `);
 
     console.log(`\n✅ Seed completed successfully!`);

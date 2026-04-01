@@ -4,12 +4,15 @@ import { register, login, verifyEmail, forgotPassword, resetPassword } from '../
 
 const router = express.Router();
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   message: { error: 'Too many attempts, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => isDev,
 });
 
 const emailLimiter = rateLimit({
@@ -18,6 +21,7 @@ const emailLimiter = rateLimit({
   message: { error: 'Too many requests, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => isDev,
 });
 
 router.post('/register', emailLimiter, register);

@@ -95,7 +95,7 @@ export const NotificationProvider = ({ children }) => {
       newSocket.off('user-status', handleUserStatus);
       newSocket.close();
     };
-  }, [user]);
+  }, [user?.id]);
 
   const markAsRead = () => {
     setUnreadCount(0);

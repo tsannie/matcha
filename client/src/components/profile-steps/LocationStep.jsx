@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { searchLocation, reverseGeocode } from '../../utils/geocoding';
+import { searchLocation, reverseGeocode, getLocationFromIP } from '../../utils/geocoding';
 import SpinnerIcon from '../../assets/icons/spinner.svg?react';
 
 const LocationStep = ({ latitude, longitude, locationName, onLocationChange, loading }) => {
@@ -71,23 +71,33 @@ const LocationStep = ({ latitude, longitude, locationName, onLocationChange, loa
         setGpsLoading(false);
       },
       (error) => {
-        setGpsLoading(false);
-        let errorMessage = 'Unable to retrieve your location';
+        // Keep gpsLoading true while trying IP fallback silently
+        const tryIPFallback = async () => {
+          const ipLocation = await getLocationFromIP();
+          if (ipLocation) {
+            const locationData = await reverseGeocode(ipLocation.lat, ipLocation.lon);
+            const name = locationData?.shortName || `${ipLocation.lat.toFixed(4)}, ${ipLocation.lon.toFixed(4)}`;
+            onLocationChange(ipLocation.lat, ipLocation.lon, name);
+          } else {
+            let errorMessage = 'Unable to retrieve your location';
+            switch (error.code) {
+              case error.PERMISSION_DENIED:
+                errorMessage = 'Location permission denied. Please enter your location manually.';
+                break;
+              case error.POSITION_UNAVAILABLE:
+                errorMessage = 'Location information unavailable. Please enter manually.';
+                break;
+              case error.TIMEOUT:
+                errorMessage = 'Location request timed out. Please try again or enter manually.';
+                break;
+            }
+            setGpsError(errorMessage);
+            setMode('manual');
+          }
+          setGpsLoading(false);
+        };
 
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = 'Location permission denied. Please enter your location manually.';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Location information unavailable. Please enter manually.';
-            break;
-          case error.TIMEOUT:
-            errorMessage = 'Location request timed out. Please try again or enter manually.';
-            break;
-        }
-
-        setGpsError(errorMessage);
-        setMode('manual');
+        tryIPFallback();
       },
     );
   };

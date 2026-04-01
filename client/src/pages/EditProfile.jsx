@@ -8,6 +8,7 @@ import AboutStep from '../components/profile-steps/AboutStep';
 import InterestsStep from '../components/profile-steps/InterestsStep';
 import PhotosStep from '../components/profile-steps/PhotosStep';
 import LocationStep from '../components/profile-steps/LocationStep';
+import { reverseGeocode } from '../utils/geocoding';
 
 const EditProfile = () => {
   const { user, updateUser } = useAuth();
@@ -41,11 +42,17 @@ const EditProfile = () => {
       });
       setTags(user.tags || []);
       setImages(user.images || []);
-      setLocation({
-        latitude: user.latitude || null,
-        longitude: user.longitude || null,
-        name: user.location_name || null,
-      });
+      const lat = user.latitude || null;
+      const lon = user.longitude || null;
+      setLocation({ latitude: lat, longitude: lon, name: null });
+
+      if (lat && lon) {
+        reverseGeocode(lat, lon).then((data) => {
+          if (data?.shortName) {
+            setLocation((prev) => ({ ...prev, name: data.shortName }));
+          }
+        });
+      }
     }
   }, [user]);
 

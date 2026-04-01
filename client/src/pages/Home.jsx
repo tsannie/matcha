@@ -157,6 +157,7 @@ const Home = () => {
 
   const handleProfileClick = (userId) => setSelectedUserId(userId);
   const handleCloseModal = () => setSelectedUserId(null);
+  const handleBlockUser = (userId) => setProfiles((prev) => prev.filter((p) => p.id !== userId));
 
   if (authLoading) return null;
 
@@ -239,7 +240,7 @@ const Home = () => {
 
       {/* User Profile Modal */}
       {selectedUserId && (
-        <UserProfileModal userId={selectedUserId} onClose={handleCloseModal} onLikeChange={handleLikeChange} />
+        <UserProfileModal userId={selectedUserId} onClose={handleCloseModal} onLikeChange={handleLikeChange} onBlock={handleBlockUser} />
       )}
     </div>
   );
