@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useChat } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router';
 import api from '../../api/axios';
 import toast from 'react-hot-toast';
 import MessageInput from './MessageInput';
@@ -14,9 +13,8 @@ import ReportModal from '../ui/ReportModal';
 import { getImageUrl } from '../../utils/image';
 
 const MessageThread = () => {
-  const { activeChat, messages, fetchMessages, typing, setActiveChat, fetchConversations } = useChat();
+  const { activeChat, messages, fetchMessages, typing, conversationErrors, setActiveChat, fetchConversations } = useChat();
   const { user } = useAuth();
-  const navigate = useNavigate();
   const messagesEndRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
@@ -28,11 +26,12 @@ const MessageThread = () => {
       setLoading(true);
       fetchMessages(activeChat.id).finally(() => setLoading(false));
     }
-  }, [activeChat?.id]);
+  }, [activeChat]);
 
+  const currentMessages = messages[activeChat?.id];
   useEffect(() => {
     scrollToBottom();
-  }, [messages[activeChat?.id]]);
+  }, [currentMessages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -40,6 +39,7 @@ const MessageThread = () => {
 
   const chatMessages = messages[activeChat?.id] || [];
   const isTyping = typing[activeChat?.id];
+  const isUnavailable = !!conversationErrors[activeChat?.id];
 
   const handleBlock = async () => {
     try {
@@ -130,7 +130,12 @@ const MessageThread = () => {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
-        {loading ? (
+        {isUnavailable ? (
+          <div className="flex flex-col items-center justify-center h-full text-gray-400">
+            <div className="text-5xl mb-3">🚫</div>
+            <p className="font-medium text-gray-500">This conversation is no longer available</p>
+          </div>
+        ) : loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="animate-pulse text-gray-400">Loading messages...</div>
           </div>
@@ -151,7 +156,7 @@ const MessageThread = () => {
       </div>
 
       {/* Input */}
-      <MessageInput />
+      {!isUnavailable && <MessageInput />}
 
       {showReportModal && (
         <ReportModal

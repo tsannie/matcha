@@ -2,6 +2,7 @@ import pool from '../config/db.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { isProfileComplete } from '../utils/queryHelpers.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,23 +28,14 @@ export const uploadPhoto = async (req, res) => {
 
     const newImage = await pool.query(
       'INSERT INTO user_images (user_id, file_path, is_profile_picture) VALUES ($1, $2, $3) RETURNING *',
-      [userId, filePath, isProfilePic]
+      [userId, filePath, isProfilePic],
     );
 
-    // Check if profile is now complete and update flag
     const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
     const user = userResult.rows[0];
     const hasTags = await pool.query('SELECT user_id FROM user_tags WHERE user_id = $1 LIMIT 1', [userId]);
 
-    const isComplete =
-      user.gender &&
-      user.sexual_preference &&
-      user.biography &&
-      user.latitude !== null &&
-      user.longitude !== null &&
-      hasTags.rows.length > 0;
-
-    if (isComplete && !user.profile_complete) {
+    if (isProfileComplete(user, true, hasTags.rows.length > 0) && !user.profile_complete) {
       await pool.query('UPDATE users SET profile_complete = true WHERE id = $1', [userId]);
     }
 
@@ -102,10 +94,8 @@ export const setProfilePicture = async (req, res) => {
       throw new Error('Image not found');
     }
 
-    // 1. Mettre toutes les images du user à false
     await client.query('UPDATE user_images SET is_profile_picture = FALSE WHERE user_id = $1', [userId]);
 
-    // 2. Mettre l'image choisie à true
     await client.query('UPDATE user_images SET is_profile_picture = TRUE WHERE id = $1', [imageId]);
 
     await client.query('COMMIT');

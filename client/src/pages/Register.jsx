@@ -59,7 +59,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const { confirmPassword, ...dataToSend } = formData;
+      const { confirmPassword: _confirmPassword, ...dataToSend } = formData;
       await api.post('/auth/register', dataToSend);
       toast.success('Account created! Please check your email.');
       navigate('/login');

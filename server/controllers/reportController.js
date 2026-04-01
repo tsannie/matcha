@@ -1,6 +1,5 @@
 import pool from '../config/db.js';
 
-// Report a user as fake
 export const reportUser = async (req, res) => {
   const reporterId = req.user.id;
   const reportedId = parseInt(req.params.userId);
@@ -15,27 +14,23 @@ export const reportUser = async (req, res) => {
   }
 
   try {
-    // Check if reported user exists
-    const reportedUser = await pool.query(
-      'SELECT id, username FROM users WHERE id = $1',
-      [reportedId]
-    );
+    const reportedUser = await pool.query('SELECT id, username FROM users WHERE id = $1', [reportedId]);
 
     if (reportedUser.rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Insert or update report
     await pool.query(
       `INSERT INTO reports (reporter_id, reported_id, reason)
        VALUES ($1, $2, $3)
        ON CONFLICT (reporter_id, reported_id)
        DO UPDATE SET reason = $3, created_at = CURRENT_TIMESTAMP`,
-      [reporterId, reportedId, reason || null]
+      [reporterId, reportedId, reason || null],
     );
 
-    // Log report for admin review
-    console.log(`🚨 User ${reporterId} reported user ${reportedId} (${reportedUser.rows[0].username}) as fake account. Reason: ${reason || 'No reason provided'}`);
+    console.log(
+      `🚨 User ${reporterId} reported user ${reportedId} (${reportedUser.rows[0].username}) as fake account. Reason: ${reason || 'No reason provided'}`,
+    );
 
     res.json({ success: true, message: 'User reported successfully' });
   } catch (err) {
@@ -44,7 +39,6 @@ export const reportUser = async (req, res) => {
   }
 };
 
-// Get my reports
 export const getMyReports = async (req, res) => {
   const userId = req.user.id;
 
@@ -61,7 +55,7 @@ export const getMyReports = async (req, res) => {
       JOIN users u ON r.reported_id = u.id
       WHERE r.reporter_id = $1
       ORDER BY r.created_at DESC`,
-      [userId]
+      [userId],
     );
 
     res.json(result.rows);

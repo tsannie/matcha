@@ -14,6 +14,33 @@ export const ChatProvider = ({ children }) => {
   const [messages, setMessages] = useState({});
   const [unreadCounts, setUnreadCounts] = useState({});
   const [typing, setTyping] = useState({});
+  const [conversationErrors, setConversationErrors] = useState({});
+
+  const fetchConversations = async () => {
+    try {
+      const { data } = await api.get('/chat/conversations');
+      setConversations(data);
+
+      const counts = {};
+      data.forEach(conv => {
+        counts[conv.user_id] = parseInt(conv.unread_count) || 0; // Force number conversion
+      });
+      console.log('📊 Unread counts loaded:', counts);
+      setUnreadCounts(counts);
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+    }
+  };
+
+  const updateConversationLastMessage = (userId, lastMessage) => {
+    setConversations(prev =>
+      prev.map(conv =>
+        conv.user_id === userId
+          ? { ...conv, last_message: lastMessage, last_message_time: new Date().toISOString() }
+          : conv
+      )
+    );
+  };
 
   // Fetch conversations on mount
   useEffect(() => {
@@ -126,11 +153,17 @@ export const ChatProvider = ({ children }) => {
       }
     };
 
+    const handleConversationUnavailable = ({ userId }) => {
+      setConversationErrors(prev => ({ ...prev, [userId]: 'unavailable' }));
+      setConversations(prev => prev.filter(conv => conv.user_id !== userId));
+    };
+
     socket.on('receive-message', handleReceiveMessage);
     socket.on('message-sent', handleMessageSent);
     socket.on('user-typing', handleUserTyping);
     socket.on('user-stopped-typing', handleUserStoppedTyping);
     socket.on('chat-deleted', handleChatDeleted);
+    socket.on('conversation_unavailable', handleConversationUnavailable);
 
     return () => {
       socket.off('receive-message', handleReceiveMessage);
@@ -138,34 +171,9 @@ export const ChatProvider = ({ children }) => {
       socket.off('user-typing', handleUserTyping);
       socket.off('user-stopped-typing', handleUserStoppedTyping);
       socket.off('chat-deleted', handleChatDeleted);
+      socket.off('conversation_unavailable', handleConversationUnavailable);
     };
   }, [socket, activeChat, user]);
-
-  const fetchConversations = async () => {
-    try {
-      const { data } = await api.get('/chat/conversations');
-      setConversations(data);
-
-      const counts = {};
-      data.forEach(conv => {
-        counts[conv.user_id] = parseInt(conv.unread_count) || 0; // Force number conversion
-      });
-      console.log('📊 Unread counts loaded:', counts);
-      setUnreadCounts(counts);
-    } catch (error) {
-      console.error('Error fetching conversations:', error);
-    }
-  };
-
-  const updateConversationLastMessage = (userId, lastMessage) => {
-    setConversations(prev =>
-      prev.map(conv =>
-        conv.user_id === userId
-          ? { ...conv, last_message: lastMessage, last_message_time: new Date().toISOString() }
-          : conv
-      )
-    );
-  };
 
   const fetchMessages = async (userId) => {
     try {
@@ -183,7 +191,12 @@ export const ChatProvider = ({ children }) => {
       );
     } catch (error) {
       console.error('Error fetching messages:', error);
-      toast.error('Failed to load messages');
+      if (error.response?.status === 403) {
+        setConversationErrors(prev => ({ ...prev, [userId]: 'unavailable' }));
+        setConversations(prev => prev.filter(conv => conv.user_id !== userId));
+      } else {
+        toast.error('Failed to load messages');
+      }
     }
   };
 
@@ -212,6 +225,7 @@ export const ChatProvider = ({ children }) => {
         messages,
         unreadCounts,
         typing,
+        conversationErrors,
         sendMessage,
         fetchMessages,
         fetchConversations,

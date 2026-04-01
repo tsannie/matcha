@@ -1,7 +1,6 @@
 import pool from '../config/db.js';
-import { emitNotification } from '../socket.js';
+import { createNotification } from '../utils/notifications.js';
 
-// Get list of conversations with last message preview
 export const getConversations = async (req, res) => {
   const userId = req.user.id;
 
@@ -33,7 +32,7 @@ export const getConversations = async (req, res) => {
         WHERE (blocker_id = $1 AND blocked_id = u.id) OR (blocker_id = u.id AND blocked_id = $1)
       )
       ORDER BY last_message_time DESC NULLS LAST`,
-      [userId]
+      [userId],
     );
 
     res.json(result.rows);
@@ -43,7 +42,6 @@ export const getConversations = async (req, res) => {
   }
 };
 
-// Get message history with specific user
 export const getMessages = async (req, res) => {
   const userId = req.user.id;
   const targetUserId = parseInt(req.params.userId);
@@ -51,22 +49,20 @@ export const getMessages = async (req, res) => {
   const offset = parseInt(req.query.offset) || 0;
 
   try {
-    // Fetch messages
     const result = await pool.query(
       `SELECT id, sender_id, receiver_id, content, is_read, created_at
        FROM messages
        WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1)
        ORDER BY created_at ASC
        LIMIT $3 OFFSET $4`,
-      [userId, targetUserId, limit, offset]
+      [userId, targetUserId, limit, offset],
     );
 
-    // Mark messages from target user as read
     await pool.query(
       `UPDATE messages
        SET is_read = true
        WHERE sender_id = $1 AND receiver_id = $2 AND is_read = false`,
-      [targetUserId, userId]
+      [targetUserId, userId],
     );
 
     res.json(result.rows);
@@ -76,40 +72,28 @@ export const getMessages = async (req, res) => {
   }
 };
 
-// Send message (HTTP fallback)
 export const sendMessage = async (req, res) => {
   const userId = req.user.id;
   const targetUserId = parseInt(req.params.userId);
   const { content } = req.body;
 
   try {
-    // Insert message
     const result = await pool.query(
       'INSERT INTO messages (sender_id, receiver_id, content) VALUES ($1, $2, $3) RETURNING *',
-      [userId, targetUserId, content]
+      [userId, targetUserId, content],
     );
 
     const message = result.rows[0];
 
-    // Get sender username
     const userResult = await pool.query('SELECT username FROM users WHERE id = $1', [userId]);
     const username = userResult.rows[0].username;
 
-    // Create notification
-    await pool.query(
-      'INSERT INTO notifications (user_id, type, from_user_id, message) VALUES ($1, $2, $3, $4)',
-      [targetUserId, 'message', userId, `New message from ${username}`]
-    );
-
-    // Emit real-time notification
-    emitNotification(targetUserId, {
-      id: Date.now(),
+    await createNotification(pool, {
+      userId: targetUserId,
       type: 'message',
-      from_user_id: userId,
-      from_username: username,
+      fromUserId: userId,
+      fromUsername: username,
       message: `New message from ${username}`,
-      created_at: new Date(),
-      is_read: false
     });
 
     res.status(201).json(message);
@@ -119,7 +103,6 @@ export const sendMessage = async (req, res) => {
   }
 };
 
-// Mark messages as read
 export const markMessagesAsRead = async (req, res) => {
   const userId = req.user.id;
   const senderId = parseInt(req.params.userId);
@@ -130,7 +113,7 @@ export const markMessagesAsRead = async (req, res) => {
        SET is_read = true
        WHERE sender_id = $1 AND receiver_id = $2 AND is_read = false
        RETURNING id`,
-      [senderId, userId]
+      [senderId, userId],
     );
 
     res.json({ count: result.rowCount });

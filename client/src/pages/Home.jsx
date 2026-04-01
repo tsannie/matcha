@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router';
 import api from '../api/axios';
 import FilterSidebar from '../components/FilterSidebar';
 import ProfileCard from '../components/ProfileCard';
@@ -10,7 +9,6 @@ import SortOrderButton from '../components/ui/SortOrderButton';
 import ChevronLeftIcon from '../assets/icons/chevron-left.svg?react';
 
 const Home = () => {
-  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
   const [profiles, setProfiles] = useState([]);

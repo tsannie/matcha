@@ -85,7 +85,7 @@ const CompleteProfile = () => {
       setProfile((prev) => ({ ...prev, images: newImages }));
       updateUser({ images: newImages }); // Update Context
       toast.success('Photo deleted');
-    } catch (error) {
+    } catch {
       toast.error('Delete failed');
     }
   };
@@ -97,7 +97,7 @@ const CompleteProfile = () => {
       setProfile((prev) => ({ ...prev, images: newImages }));
       updateUser({ images: newImages }); // Update Context
       toast.success('Profile picture updated');
-    } catch (error) {
+    } catch {
       toast.error('Failed to update');
     }
   };
