@@ -4,7 +4,7 @@ FROM node:22-alpine
 WORKDIR /usr/src/app
 
 # Install pnpm globally
-RUN npm install -g pnpm
+RUN npm install -g pnpm@10.15.1
 
 # Copy package files strictly for caching
 COPY package.json pnpm-lock.yaml ./
